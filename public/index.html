@@ -2,226 +2,244 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌱 Zero Waste Office Tracker</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
-        .container { max-width: 1200px; margin: auto; padding: 20px; }
-        .header { text-align: center; margin-bottom: 20px; }
-        h1 { margin: 0; color: #2e7d32; }
-        .controls, .stats-grid, .export-section { margin: 20px 0; }
-        .controls select, .controls input { padding: 5px; margin: 5px; }
-        .btn { background: #2e7d32; color: white; padding: 8px 12px; border: none; cursor: pointer; }
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f8f8f8; }
+        h1 { color: #2e7d32; }
+        table { border-collapse: collapse; width: 100%; background: #fff; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background: #e0f2f1; }
+        input, select, button { padding: 6px; margin: 5px; }
+        .form-section { background: #fff; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .btn { background: #2e7d32; color: white; border: none; cursor: pointer; padding: 6px 12px; }
         .btn:hover { background: #1b5e20; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background: #388e3c; color: white; }
-        .stat-card { background: white; padding: 15px; border-radius: 8px; text-align: center; }
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .export-section { margin-top: 20px; background: #fff; padding: 15px; border-radius: 6px; }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1>🌱 Zero Waste Office Tracker</h1>
-        <button class="btn" onclick="openModal()">➕ Add New Office</button>
+
+    <h1>🌱 Zero Waste Office Tracker</h1>
+
+    <div class="form-section">
+        <h2>Add / Edit Office</h2>
+        <form id="officeForm">
+            <input type="hidden" id="officeId">
+            <input type="text" id="officeName" placeholder="Office Name" required>
+            <input type="text" id="department" placeholder="Department">
+            <input type="text" id="contactPerson" placeholder="Contact Person">
+            <input type="email" id="contactEmail" placeholder="Contact Email">
+            <input type="number" id="totalEmployees" placeholder="Total Employees" min="1">
+
+            <select id="pantryStatus">
+                <option value="">Pantry Status</option>
+                <option value="Not Started">Not Started</option>
+                <option value="Planned">Planned</option>
+                <option value="Implemented">Implemented</option>
+            </select>
+            <select id="restroomsStatus">
+                <option value="">Restrooms Status</option>
+                <option value="Not Started">Not Started</option>
+                <option value="Planned">Planned</option>
+                <option value="Implemented">Implemented</option>
+            </select>
+            <select id="meetingRoomsStatus">
+                <option value="">Meeting Rooms Status</option>
+                <option value="Not Started">Not Started</option>
+                <option value="Planned">Planned</option>
+                <option value="Implemented">Implemented</option>
+            </select>
+            <select id="eventsStatus">
+                <option value="">Events Status</option>
+                <option value="Not Started">Not Started</option>
+                <option value="Planned">Planned</option>
+                <option value="Implemented">Implemented</option>
+            </select>
+            <select id="premisesStatus">
+                <option value="">Premises Status</option>
+                <option value="Not Started">Not Started</option>
+                <option value="Planned">Planned</option>
+                <option value="Implemented">Implemented</option>
+            </select>
+
+            <input type="date" id="certificateDate">
+            <button type="submit" class="btn">Save Office</button>
+        </form>
     </div>
 
-    <!-- Filters -->
-    <div class="controls">
-        <label>Area:</label>
-        <select id="areaFilter">
-            <option value="">All</option>
-            <option value="Pantry">Pantry</option>
-            <option value="Restrooms">Restrooms</option>
-            <option value="Meeting Rooms">Meeting Rooms</option>
-            <option value="Events">Events</option>
-            <option value="Premises">Premises</option>
-        </select>
-        <label>Status:</label>
-        <select id="statusFilter">
-            <option value="">All</option>
-            <option value="Implemented">Implemented</option>
-            <option value="Planned">Planned</option>
-            <option value="Not Started">Not Started</option>
-        </select>
-        <button class="btn" onclick="loadOffices()">Apply Filters</button>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats-grid">
-        <div class="stat-card"><div id="totalOffices">0</div><div>Total Offices</div></div>
-        <div class="stat-card"><div id="implementedCount">0</div><div>Implemented</div></div>
-        <div class="stat-card"><div id="plannedCount">0</div><div>Planned</div></div>
-        <div class="stat-card"><div id="notStartedCount">0</div><div>Not Started</div></div>
-    </div>
-
-    <!-- Offices Table -->
     <table>
         <thead>
             <tr>
                 <th>Office Name</th>
                 <th>Department</th>
                 <th>Contact Person</th>
+                <th>Contact Email</th>
+                <th>Total Employees</th>
                 <th>Pantry</th>
                 <th>Restrooms</th>
                 <th>Meeting Rooms</th>
                 <th>Events</th>
                 <th>Premises</th>
+                <th>Certificate Date</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody id="officeTableBody"></tbody>
     </table>
 
-    <!-- Export -->
     <div class="export-section">
-        <h3>Export Data</h3>
-        <button class="btn" onclick="exportToCSV()">📊 Export CSV</button>
-        <button class="btn" onclick="exportToJSON()">💾 Export JSON</button>
+        <h3>📂 Export Data</h3>
+        <button class="btn" onclick="exportToCSV()">Export to CSV</button>
+        <button class="btn" onclick="exportToJSON()">Export to JSON</button>
     </div>
-</div>
 
-<!-- Modal -->
-<div id="officeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0005;">
-    <div style="background:white; padding:20px; width:400px; margin:100px auto;">
-        <h3 id="modalTitle">Add Office</h3>
-        <form id="officeForm">
-            <input type="hidden" id="officeId">
-            <input placeholder="Office Name" id="officeName" required><br>
-            <input placeholder="Department" id="department"><br>
-            <input placeholder="Contact Person" id="contactPerson" required><br>
-            <select id="pantryStatus">
-                <option value="Not Started">Not Started</option>
-                <option value="Planned">Planned</option>
-                <option value="Implemented">Implemented</option>
-            </select>
-            <select id="restroomsStatus">
-                <option value="Not Started">Not Started</option>
-                <option value="Planned">Planned</option>
-                <option value="Implemented">Implemented</option>
-            </select><br>
-            <button class="btn" type="submit">Save</button>
-            <button type="button" class="btn" onclick="closeModal()">Cancel</button>
-        </form>
-    </div>
-</div>
+    <script>
+        const API_URL = '/api/offices';
 
-<script>
-const API_URL = '/api/offices';
+        async function loadOffices() {
+            const res = await fetch(API_URL);
+            const offices = await res.json();
+            const tbody = document.getElementById('officeTableBody');
+            tbody.innerHTML = '';
+            offices.forEach(office => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${office.officeName || ''}</td>
+                    <td>${office.department || ''}</td>
+                    <td>${office.contactPerson || ''}</td>
+                    <td>${office.contactEmail || ''}</td>
+                    <td>${office.totalEmployees || ''}</td>
+                    <td>${office.pantryStatus || ''}</td>
+                    <td>${office.restroomsStatus || ''}</td>
+                    <td>${office.meetingRoomsStatus || ''}</td>
+                    <td>${office.eventsStatus || ''}</td>
+                    <td>${office.premisesStatus || ''}</td>
+                    <td>${office.certificateDate || ''}</td>
+                    <td>
+                        <button onclick="editOffice('${office._id}')">Edit</button>
+                        <button onclick="deleteOffice('${office._id}')">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
-// Load Offices
-async function loadOffices() {
-    let res = await fetch(API_URL);
-    let data = await res.json();
+        async function saveOffice(e) {
+            e.preventDefault();
+            const office = {
+                officeName: document.getElementById('officeName').value,
+                department: document.getElementById('department').value,
+                contactPerson: document.getElementById('contactPerson').value,
+                contactEmail: document.getElementById('contactEmail').value,
+                totalEmployees: document.getElementById('totalEmployees').value,
+                pantryStatus: document.getElementById('pantryStatus').value,
+                restroomsStatus: document.getElementById('restroomsStatus').value,
+                meetingRoomsStatus: document.getElementById('meetingRoomsStatus').value,
+                eventsStatus: document.getElementById('eventsStatus').value,
+                premisesStatus: document.getElementById('premisesStatus').value,
+                certificateDate: document.getElementById('certificateDate').value
+            };
+            const id = document.getElementById('officeId').value;
 
-    const areaFilter = document.getElementById('areaFilter').value;
-    const statusFilter = document.getElementById('statusFilter').value;
+            if (id) {
+                await fetch(`${API_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(office)
+                });
+            } else {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(office)
+                });
+            }
+            document.getElementById('officeForm').reset();
+            document.getElementById('officeId').value = '';
+            loadOffices();
+        }
 
-    if (areaFilter) {
-        data = data.filter(o => o[`${areaFilter.toLowerCase()}Status`] === statusFilter || !statusFilter);
-    } else if (statusFilter) {
-        data = data.filter(o =>
-            o.pantryStatus === statusFilter ||
-            o.restroomsStatus === statusFilter ||
-            o.meetingRoomsStatus === statusFilter ||
-            o.eventsStatus === statusFilter ||
-            o.premisesStatus === statusFilter
-        );
-    }
+        async function editOffice(id) {
+            const res = await fetch(`${API_URL}`);
+            const offices = await res.json();
+            const office = offices.find(o => o._id === id);
+            if (!office) return;
 
-    document.getElementById('officeTableBody').innerHTML = data.map(o => `
-        <tr>
-            <td>${o.officeName}</td>
-            <td>${o.department || ''}</td>
-            <td>${o.contactPerson}</td>
-            <td>${o.pantryStatus}</td>
-            <td>${o.restroomsStatus}</td>
-            <td>${o.meetingRoomsStatus}</td>
-            <td>${o.eventsStatus}</td>
-            <td>${o.premisesStatus}</td>
-            <td>
-                <button onclick="editOffice('${o._id}')">✏ Edit</button>
-                <button onclick="deleteOffice('${o._id}')">🗑 Delete</button>
-            </td>
-        </tr>
-    `).join('');
+            document.getElementById('officeId').value = office._id;
+            document.getElementById('officeName').value = office.officeName || '';
+            document.getElementById('department').value = office.department || '';
+            document.getElementById('contactPerson').value = office.contactPerson || '';
+            document.getElementById('contactEmail').value = office.contactEmail || '';
+            document.getElementById('totalEmployees').value = office.totalEmployees || '';
+            document.getElementById('pantryStatus').value = office.pantryStatus || '';
+            document.getElementById('restroomsStatus').value = office.restroomsStatus || '';
+            document.getElementById('meetingRoomsStatus').value = office.meetingRoomsStatus || '';
+            document.getElementById('eventsStatus').value = office.eventsStatus || '';
+            document.getElementById('premisesStatus').value = office.premisesStatus || '';
+            document.getElementById('certificateDate').value = office.certificateDate || '';
+        }
 
-    // Stats
-    document.getElementById('totalOffices').innerText = data.length;
-    document.getElementById('implementedCount').innerText = data.filter(o => o.pantryStatus === 'Implemented').length;
-    document.getElementById('plannedCount').innerText = data.filter(o => o.pantryStatus === 'Planned').length;
-    document.getElementById('notStartedCount').innerText = data.filter(o => o.pantryStatus === 'Not Started').length;
-}
+        async function deleteOffice(id) {
+            if (confirm('Are you sure?')) {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                loadOffices();
+            }
+        }
 
-// Add/Edit Office
-document.getElementById('officeForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const id = document.getElementById('officeId').value;
-    const office = {
-        officeName: document.getElementById('officeName').value,
-        department: document.getElementById('department').value,
-        contactPerson: document.getElementById('contactPerson').value,
-        pantryStatus: document.getElementById('pantryStatus').value,
-        restroomsStatus: document.getElementById('restroomsStatus').value
-    };
+        async function exportToCSV() {
+            const res = await fetch(API_URL);
+            const offices = await res.json();
+            if (!offices.length) return alert("No data to export");
 
-    if (id) {
-        await fetch(`${API_URL}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(office) });
-    } else {
-        await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(office) });
-    }
-    closeModal();
-    loadOffices();
-});
+            const headers = Object.keys(offices[0]).filter(h => h !== '__v'); // remove Mongo __v field
+            const csvRows = [];
+            csvRows.push(headers.join(','));
 
-// Edit
-async function editOffice(id) {
-    const res = await fetch(`${API_URL}/${id}`);
-    const o = await res.json();
-    document.getElementById('officeId').value = o._id;
-    document.getElementById('officeName').value = o.officeName;
-    document.getElementById('department').value = o.department || '';
-    document.getElementById('contactPerson').value = o.contactPerson;
-    document.getElementById('pantryStatus').value = o.pantryStatus;
-    document.getElementById('restroomsStatus').value = o.restroomsStatus;
-    openModal();
-}
+            offices.forEach(o => {
+                const row = headers.map(h => {
+                    let val = o[h] || '';
 
-// Delete
-async function deleteOffice(id) {
-    if (confirm('Delete this office?')) {
-        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        loadOffices();
-    }
-}
+                    // Format date if it's in ISO format
+                    if (h.toLowerCase().includes('date') && val) {
+                        const d = new Date(val);
+                        if (!isNaN(d)) {
+                            val = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                        }
+                    }
 
-// Export
-async function exportToCSV() {
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    const csv = [Object.keys(data[0]).join(','), ...data.map(row => Object.values(row).join(','))].join('\n');
-    downloadFile(csv, 'offices.csv', 'text/csv');
-}
+                    // Escape quotes for CSV
+                    val = String(val).replace(/"/g, '""');
+                    return `"${val}"`;
+                });
+                csvRows.push(row.join(','));
+            });
 
-async function exportToJSON() {
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    downloadFile(JSON.stringify(data, null, 2), 'offices.json', 'application/json');
-}
+            const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'offices.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
 
-function downloadFile(content, fileName, type) {
-    const a = document.createElement('a');
-    const file = new Blob([content], { type });
-    a.href = URL.createObjectURL(file);
-    a.download = fileName;
-    a.click();
-}
+        async function exportToJSON() {
+            const res = await fetch(API_URL);
+            const offices = await res.json();
+            if (!offices.length) return alert("No data to export");
 
-// Modal
-function openModal() { document.getElementById('officeModal').style.display = 'block'; }
-function closeModal() { document.getElementById('officeModal').style.display = 'none'; document.getElementById('officeForm').reset(); document.getElementById('officeId').value = ''; }
+            const blob = new Blob([JSON.stringify(offices, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'offices.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
 
-window.onload = loadOffices;
-</script>
+        document.getElementById('officeForm').addEventListener('submit', saveOffice);
+        window.onload = loadOffices;
+    </script>
+
 </body>
 </html>

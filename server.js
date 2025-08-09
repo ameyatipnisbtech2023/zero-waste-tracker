@@ -20,6 +20,7 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // Office Schema
+// Office Schema
 const officeSchema = new mongoose.Schema({
     officeName: String,
     department: String,
@@ -31,10 +32,10 @@ const officeSchema = new mongoose.Schema({
     meetingRoomsStatus: String,
     eventsStatus: String,
     premisesStatus: String,
-    overallProgress: Number,
     certificateDate: String,
-    notes: String
+    Notes: String
 });
+
 
 const Office = mongoose.model('Office', officeSchema);
 
@@ -72,16 +73,16 @@ app.post('/api/offices', async (req, res) => {
     }
 });
 
-// Update office
+// Update Office
 app.put('/api/offices/:id', async (req, res) => {
     try {
         const updatedOffice = await Office.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedOffice) return res.status(404).json({ error: 'Office not found' });
         res.json(updatedOffice);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
 
 // Delete office
 app.delete('/api/offices/:id', async (req, res) => {
