@@ -2,752 +2,226 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zero Waste Office Tracker</title>
+    <title>🌱 Zero Waste Office Tracker</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #2E8B57 0%, #228B22 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .dashboard {
-            padding: 30px;
-        }
-
-        .controls {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .control-group label {
-            font-weight: bold;
-            color: #333;
-            font-size: 0.9rem;
-        }
-
-        .control-group input, .control-group select {
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-
-        .control-group input:focus, .control-group select:focus {
-            outline: none;
-            border-color: #2E8B57;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #2E8B57 0%, #228B22 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 20px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(46, 139, 87, 0.3);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #f8f9ff 0%, #e8f4f8 100%);
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid #e0e0e0;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #2E8B57;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-
-        th {
-            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-            color: white;
-            padding: 15px 10px;
-            text-align: left;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.2s;
-        }
-
-        tr:hover td {
-            background-color: #f8f9ff;
-        }
-
-        .status-implemented {
-            background: #d4edda;
-            color: #155724;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        .status-planned {
-            background: #fff3cd;
-            color: #856404;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        .status-not-started {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        .edit-btn {
-            background: #17a2b8;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        .edit-btn:hover {
-            background: #138496;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: #000;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .form-group textarea {
-            height: 80px;
-            resize: vertical;
-        }
-
-        .export-section {
-            margin-top: 30px;
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-        }
-
-        .export-btn {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            margin: 0 10px;
-        }
-
-        @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            th, td {
-                padding: 8px 5px;
-                font-size: 0.9rem;
-            }
-        }
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 1200px; margin: auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        h1 { margin: 0; color: #2e7d32; }
+        .controls, .stats-grid, .export-section { margin: 20px 0; }
+        .controls select, .controls input { padding: 5px; margin: 5px; }
+        .btn { background: #2e7d32; color: white; padding: 8px 12px; border: none; cursor: pointer; }
+        .btn:hover { background: #1b5e20; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background: #388e3c; color: white; }
+        .stat-card { background: white; padding: 15px; border-radius: 8px; text-align: center; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🌱 Zero Waste Office Tracker</h1>
-        </div>
+<div class="container">
+    <div class="header">
+        <h1>🌱 Zero Waste Office Tracker</h1>
+        <button class="btn" onclick="openModal()">➕ Add New Office</button>
+    </div>
 
-        <!-- Form for adding entries -->
-        <form id="entryForm">
-            <input id="name" placeholder="Name" required>
-            <input id="category" placeholder="Category" required>
-            <input id="quantity" type="number" placeholder="Quantity" required>
-            <button type="submit">Add</button>
+    <!-- Filters -->
+    <div class="controls">
+        <label>Area:</label>
+        <select id="areaFilter">
+            <option value="">All</option>
+            <option value="Pantry">Pantry</option>
+            <option value="Restrooms">Restrooms</option>
+            <option value="Meeting Rooms">Meeting Rooms</option>
+            <option value="Events">Events</option>
+            <option value="Premises">Premises</option>
+        </select>
+        <label>Status:</label>
+        <select id="statusFilter">
+            <option value="">All</option>
+            <option value="Implemented">Implemented</option>
+            <option value="Planned">Planned</option>
+            <option value="Not Started">Not Started</option>
+        </select>
+        <button class="btn" onclick="loadOffices()">Apply Filters</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card"><div id="totalOffices">0</div><div>Total Offices</div></div>
+        <div class="stat-card"><div id="implementedCount">0</div><div>Implemented</div></div>
+        <div class="stat-card"><div id="plannedCount">0</div><div>Planned</div></div>
+        <div class="stat-card"><div id="notStartedCount">0</div><div>Not Started</div></div>
+    </div>
+
+    <!-- Offices Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Office Name</th>
+                <th>Department</th>
+                <th>Contact Person</th>
+                <th>Pantry</th>
+                <th>Restrooms</th>
+                <th>Meeting Rooms</th>
+                <th>Events</th>
+                <th>Premises</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="officeTableBody"></tbody>
+    </table>
+
+    <!-- Export -->
+    <div class="export-section">
+        <h3>Export Data</h3>
+        <button class="btn" onclick="exportToCSV()">📊 Export CSV</button>
+        <button class="btn" onclick="exportToJSON()">💾 Export JSON</button>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="officeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0005;">
+    <div style="background:white; padding:20px; width:400px; margin:100px auto;">
+        <h3 id="modalTitle">Add Office</h3>
+        <form id="officeForm">
+            <input type="hidden" id="officeId">
+            <input placeholder="Office Name" id="officeName" required><br>
+            <input placeholder="Department" id="department"><br>
+            <input placeholder="Contact Person" id="contactPerson" required><br>
+            <select id="pantryStatus">
+                <option value="Not Started">Not Started</option>
+                <option value="Planned">Planned</option>
+                <option value="Implemented">Implemented</option>
+            </select>
+            <select id="restroomsStatus">
+                <option value="Not Started">Not Started</option>
+                <option value="Planned">Planned</option>
+                <option value="Implemented">Implemented</option>
+            </select><br>
+            <button class="btn" type="submit">Save</button>
+            <button type="button" class="btn" onclick="closeModal()">Cancel</button>
         </form>
-
-        <!-- Dashboard Table -->
-        <table id="entriesTable">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Quantity</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-            <p>Monitor and track zero waste implementation across office areas</p>
-        </div>
-
-        <div class="dashboard">
-            <div class="controls">
-                <div class="control-group">
-                    <label>Office Name:</label>
-                    <input type="text" id="officeName" placeholder="Enter office name">
-                </div>
-                <div class="control-group">
-                    <label>Department:</label>
-                    <input type="text" id="department" placeholder="Enter department">
-                </div>
-                <div class="control-group">
-                    <label>Area Filter:</label>
-                    <select id="areaFilter">
-                        <option value="">All Areas</option>
-                        <option value="Pantry">Pantry</option>
-                        <option value="Restrooms">Restrooms</option>
-                        <option value="Meeting Rooms">Meeting Rooms</option>
-                        <option value="Events">Events</option>
-                        <option value="Premises">Premises</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>Status Filter:</label>
-                    <select id="statusFilter">
-                        <option value="">All Status</option>
-                        <option value="Implemented">Implemented</option>
-                        <option value="Planned">Planned</option>
-                        <option value="Not Started">Not Started</option>
-                    </select>
-                </div>
-                <button class="btn" onclick="addNewOffice()">Add New Office</button>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalOffices">0</div>
-                    <div class="stat-label">Total Offices</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="implementedCount">0</div>
-                    <div class="stat-label">Fully Implemented</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="inProgressCount">0</div>
-                    <div class="stat-label">In Progress</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="avgProgress">0%</div>
-                    <div class="stat-label">Average Progress</div>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <table id="officeTable">
-                    <thead>
-                        <tr>
-                            <th>Office Name</th>
-                            <th>Department</th>
-                            <th>Contact Person</th>
-                            <th>Total Employees</th>
-                            <th>Pantry Status</th>
-                            <th>Restrooms Status</th>
-                            <th>Meeting Rooms Status</th>
-                            <th>Events Status</th>
-                            <th>Premises Status</th>
-                            <th>Overall Progress</th>
-                            <th>Certificate Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="officeTableBody">
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="export-section">
-                <h3>Export Data</h3>
-                <p>Download your zero waste implementation data</p>
-                <button class="btn export-btn" onclick="exportToCSV()">📊 Export to CSV</button>
-                <button class="btn export-btn" onclick="exportToJSON()">💾 Export to JSON</button>
-            </div>
-        </div>
     </div>
+</div>
 
-    <!-- Modal for adding/editing offices -->
-    <div id="officeModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="modalTitle">Add New Office</h2>
-            <form id="officeForm">
-                <div class="form-group">
-                    <label>Office Name *</label>
-                    <input type="text" id="modalOfficeName" required>
-                </div>
-                <div class="form-group">
-                    <label>Department</label>
-                    <input type="text" id="modalDepartment">
-                </div>
-                <div class="form-group">
-                    <label>Contact Person *</label>
-                    <input type="text" id="modalContactPerson" required>
-                </div>
-                <div class="form-group">
-                    <label>Contact Email</label>
-                    <input type="email" id="modalContactEmail">
-                </div>
-                <div class="form-group">
-                    <label>Total Employees</label>
-                    <input type="number" id="modalTotalEmployees" min="1">
-                </div>
-                <div class="form-group">
-                    <label>Pantry Status</label>
-                    <select id="modalPantryStatus">
-                        <option value="Not Started">Not Started</option>
-                        <option value="Planned">Planned</option>
-                        <option value="Implemented">Implemented</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Restrooms Status</label>
-                    <select id="modalRestroomsStatus">
-                        <option value="Not Started">Not Started</option>
-                        <option value="Planned">Planned</option>
-                        <option value="Implemented">Implemented</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Meeting Rooms Status</label>
-                    <select id="modalMeetingRoomsStatus">
-                        <option value="Not Started">Not Started</option>
-                        <option value="Planned">Planned</option>
-                        <option value="Implemented">Implemented</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Events Status</label>
-                    <select id="modalEventsStatus">
-                        <option value="Not Started">Not Started</option>
-                        <option value="Planned">Planned</option>
-                        <option value="Implemented">Implemented</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Premises Status</label>
-                    <select id="modalPremisesStatus">
-                        <option value="Not Started">Not Started</option>
-                        <option value="Planned">Planned</option>
-                        <option value="Implemented">Implemented</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Certificate Date</label>
-                    <input type="date" id="modalCertificateDate">
-                </div>
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="modalNotes" placeholder="Additional notes or observations"></textarea>
-                </div>
-                <button type="submit" class="btn">Save Office</button>
-            </form>
-        </div>
-    </div>
+<script>
+const API_URL = '/api/offices';
 
-    <script>
-    const API_URL = '/api/entries';
+// Load Offices
+async function loadOffices() {
+    let res = await fetch(API_URL);
+    let data = await res.json();
 
-    async function loadEntries() {
-        const res = await fetch(API_URL);
-        const entries = await res.json();
-        const tbody = document.querySelector('#entriesTable tbody');
-        tbody.innerHTML = '';
-        entries.forEach(entry => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${entry.name}</td>
-                <td>${entry.category}</td>
-                <td>${entry.quantity}</td>
-                <td>
-                    <button onclick="editEntry('${entry._id}')">Edit</button>
-                    <button onclick="deleteEntry('${entry._id}')">Delete</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
+    const areaFilter = document.getElementById('areaFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+
+    if (areaFilter) {
+        data = data.filter(o => o[`${areaFilter.toLowerCase()}Status`] === statusFilter || !statusFilter);
+    } else if (statusFilter) {
+        data = data.filter(o =>
+            o.pantryStatus === statusFilter ||
+            o.restroomsStatus === statusFilter ||
+            o.meetingRoomsStatus === statusFilter ||
+            o.eventsStatus === statusFilter ||
+            o.premisesStatus === statusFilter
+        );
     }
 
-    async function addEntry(e) {
-        e.preventDefault();
-        const name = document.querySelector('#name').value;
-        const category = document.querySelector('#category').value;
-        const quantity = document.querySelector('#quantity').value;
+    document.getElementById('officeTableBody').innerHTML = data.map(o => `
+        <tr>
+            <td>${o.officeName}</td>
+            <td>${o.department || ''}</td>
+            <td>${o.contactPerson}</td>
+            <td>${o.pantryStatus}</td>
+            <td>${o.restroomsStatus}</td>
+            <td>${o.meetingRoomsStatus}</td>
+            <td>${o.eventsStatus}</td>
+            <td>${o.premisesStatus}</td>
+            <td>
+                <button onclick="editOffice('${o._id}')">✏ Edit</button>
+                <button onclick="deleteOffice('${o._id}')">🗑 Delete</button>
+            </td>
+        </tr>
+    `).join('');
 
-        await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, category, quantity })
-        });
+    // Stats
+    document.getElementById('totalOffices').innerText = data.length;
+    document.getElementById('implementedCount').innerText = data.filter(o => o.pantryStatus === 'Implemented').length;
+    document.getElementById('plannedCount').innerText = data.filter(o => o.pantryStatus === 'Planned').length;
+    document.getElementById('notStartedCount').innerText = data.filter(o => o.pantryStatus === 'Not Started').length;
+}
 
-        document.querySelector('#entryForm').reset();
-        loadEntries();
+// Add/Edit Office
+document.getElementById('officeForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const id = document.getElementById('officeId').value;
+    const office = {
+        officeName: document.getElementById('officeName').value,
+        department: document.getElementById('department').value,
+        contactPerson: document.getElementById('contactPerson').value,
+        pantryStatus: document.getElementById('pantryStatus').value,
+        restroomsStatus: document.getElementById('restroomsStatus').value
+    };
+
+    if (id) {
+        await fetch(`${API_URL}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(office) });
+    } else {
+        await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(office) });
     }
+    closeModal();
+    loadOffices();
+});
 
-    async function editEntry(id) {
-        const name = prompt('Enter new name:');
-        const category = prompt('Enter new category:');
-        const quantity = prompt('Enter new quantity:');
+// Edit
+async function editOffice(id) {
+    const res = await fetch(`${API_URL}/${id}`);
+    const o = await res.json();
+    document.getElementById('officeId').value = o._id;
+    document.getElementById('officeName').value = o.officeName;
+    document.getElementById('department').value = o.department || '';
+    document.getElementById('contactPerson').value = o.contactPerson;
+    document.getElementById('pantryStatus').value = o.pantryStatus;
+    document.getElementById('restroomsStatus').value = o.restroomsStatus;
+    openModal();
+}
 
-        if (name && category && quantity) {
-            await fetch(`${API_URL}/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, category, quantity })
-            });
-            loadEntries();
-        }
+// Delete
+async function deleteOffice(id) {
+    if (confirm('Delete this office?')) {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        loadOffices();
     }
+}
 
-    async function deleteEntry(id) {
-        if (confirm('Are you sure?')) {
-            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-            loadEntries();
-        }
-    }
+// Export
+async function exportToCSV() {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    const csv = [Object.keys(data[0]).join(','), ...data.map(row => Object.values(row).join(','))].join('\n');
+    downloadFile(csv, 'offices.csv', 'text/csv');
+}
 
-    document.querySelector('#entryForm').addEventListener('submit', addEntry);
-    window.onload = loadEntries;
-    // Start with an empty array instead of hardcoded entries
-    let offices = [];
-    let currentEditId = null;
+async function exportToJSON() {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    downloadFile(JSON.stringify(data, null, 2), 'offices.json', 'application/json');
+}
 
-    function renderTable() {
-        const tbody = document.getElementById('officeTableBody');
-        const areaFilter = document.getElementById('areaFilter').value;
-        const statusFilter = document.getElementById('statusFilter').value;
+function downloadFile(content, fileName, type) {
+    const a = document.createElement('a');
+    const file = new Blob([content], { type });
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+}
 
-        let filteredOffices = offices;
+// Modal
+function openModal() { document.getElementById('officeModal').style.display = 'block'; }
+function closeModal() { document.getElementById('officeModal').style.display = 'none'; document.getElementById('officeForm').reset(); document.getElementById('officeId').value = ''; }
 
-        if (statusFilter) {
-            filteredOffices = offices.filter(office => {
-                return office.pantryStatus === statusFilter ||
-                       office.restroomsStatus === statusFilter ||
-                       office.meetingRoomsStatus === statusFilter ||
-                       office.eventsStatus === statusFilter ||
-                       office.premisesStatus === statusFilter;
-            });
-        }
-
-        tbody.innerHTML = '';
-
-        filteredOffices.forEach(office => {
-            const progress = calculateProgress(office);
-            const row = `
-                <tr>
-                    <td><strong>${office.officeName}</strong></td>
-                    <td>${office.department}</td>
-                    <td>${office.contactPerson}<br><small>${office.contactEmail}</small></td>
-                    <td>${office.totalEmployees}</td>
-                    <td><span class="status-${office.pantryStatus.toLowerCase().replace(' ', '-')}">${office.pantryStatus}</span></td>
-                    <td><span class="status-${office.restroomsStatus.toLowerCase().replace(' ', '-')}">${office.restroomsStatus}</span></td>
-                    <td><span class="status-${office.meetingRoomsStatus.toLowerCase().replace(' ', '-')}">${office.meetingRoomsStatus}</span></td>
-                    <td><span class="status-${office.eventsStatus.toLowerCase().replace(' ', '-')}">${office.eventsStatus}</span></td>
-                    <td><span class="status-${office.premisesStatus.toLowerCase().replace(' ', '-')}">${office.premisesStatus}</span></td>
-                    <td><strong>${progress}%</strong></td>
-                    <td>${office.certificateDate || 'Pending'}</td>
-                    <td>
-                        <button class="edit-btn" onclick="editOffice(${office.id})">Edit</button>
-                    </td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        });
-
-        updateStats();
-    }
-
-    function calculateProgress(office) {
-        const statuses = [
-            office.pantryStatus,
-            office.restroomsStatus,
-            office.meetingRoomsStatus,
-            office.eventsStatus,
-            office.premisesStatus
-        ];
-        const implementedCount = statuses.filter(status => status === 'Implemented').length;
-        return Math.round((implementedCount / statuses.length) * 100);
-    }
-
-    function updateStats() {
-        const totalOffices = offices.length;
-        const fullyImplemented = offices.filter(office => calculateProgress(office) === 100).length;
-        const inProgress = offices.filter(office => {
-            const progress = calculateProgress(office);
-            return progress > 0 && progress < 100;
-        }).length;
-
-        const avgProgress = totalOffices > 0 ?
-            Math.round(offices.reduce((sum, office) => sum + calculateProgress(office), 0) / totalOffices) : 0;
-
-        document.getElementById('totalOffices').textContent = totalOffices;
-        document.getElementById('implementedCount').textContent = fullyImplemented;
-        document.getElementById('inProgressCount').textContent = inProgress;
-        document.getElementById('avgProgress').textContent = avgProgress + '%';
-    }
-
-    function addNewOffice() {
-        currentEditId = null;
-        document.getElementById('modalTitle').textContent = 'Add New Office';
-        document.getElementById('officeForm').reset();
-        document.getElementById('officeModal').style.display = 'block';
-    }
-
-    function editOffice(id) {
-        currentEditId = id;
-        const office = offices.find(o => o.id === id);
-
-        document.getElementById('modalTitle').textContent = 'Edit Office';
-        document.getElementById('modalOfficeName').value = office.officeName;
-        document.getElementById('modalDepartment').value = office.department;
-        document.getElementById('modalContactPerson').value = office.contactPerson;
-        document.getElementById('modalContactEmail').value = office.contactEmail;
-        document.getElementById('modalTotalEmployees').value = office.totalEmployees;
-        document.getElementById('modalPantryStatus').value = office.pantryStatus;
-        document.getElementById('modalRestroomsStatus').value = office.restroomsStatus;
-        document.getElementById('modalMeetingRoomsStatus').value = office.meetingRoomsStatus;
-        document.getElementById('modalEventsStatus').value = office.eventsStatus;
-        document.getElementById('modalPremisesStatus').value = office.premisesStatus;
-        document.getElementById('modalCertificateDate').value = office.certificateDate;
-        document.getElementById('modalNotes').value = office.notes;
-
-        document.getElementById('officeModal').style.display = 'block';
-    }
-
-    function exportToCSV() {
-        const headers = [
-            'Office Name', 'Department', 'Contact Person', 'Contact Email', 'Total Employees',
-            'Pantry Status', 'Restrooms Status', 'Meeting Rooms Status', 'Events Status',
-            'Premises Status', 'Overall Progress', 'Certificate Date', 'Notes'
-        ];
-
-        let csvContent = headers.join(',') + '\n';
-
-        offices.forEach(office => {
-            const row = [
-                office.officeName,
-                office.department,
-                office.contactPerson,
-                office.contactEmail,
-                office.totalEmployees,
-                office.pantryStatus,
-                office.restroomsStatus,
-                office.meetingRoomsStatus,
-                office.eventsStatus,
-                office.premisesStatus,
-                calculateProgress(office) + '%',
-                office.certificateDate,
-                office.notes
-            ].map(field => `"${field}"`).join(',');
-
-            csvContent += row + '\n';
-        });
-
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'zero_waste_office_tracker.csv';
-        a.click();
-        window.URL.revokeObjectURL(url);
-    }
-
-    function exportToJSON() {
-        const dataStr = JSON.stringify(offices, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'zero_waste_office_tracker.json';
-        a.click();
-        window.URL.revokeObjectURL(url);
-    }
-
-    // Event listeners
-    document.getElementById('areaFilter').addEventListener('change', renderTable);
-    document.getElementById('statusFilter').addEventListener('change', renderTable);
-
-    document.querySelector('.close').addEventListener('click', () => {
-        document.getElementById('officeModal').style.display = 'none';
-    });
-
-    document.getElementById('officeForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        const officeData = {
-            officeName: document.getElementById('modalOfficeName').value,
-            department: document.getElementById('modalDepartment').value,
-            contactPerson: document.getElementById('modalContactPerson').value,
-            contactEmail: document.getElementById('modalContactEmail').value,
-            totalEmployees: parseInt(document.getElementById('modalTotalEmployees').value) || 0,
-            pantryStatus: document.getElementById('modalPantryStatus').value,
-            restroomsStatus: document.getElementById('modalRestroomsStatus').value,
-            meetingRoomsStatus: document.getElementById('modalMeetingRoomsStatus').value,
-            eventsStatus: document.getElementById('modalEventsStatus').value,
-            premisesStatus: document.getElementById('modalPremisesStatus').value,
-            certificateDate: document.getElementById('modalCertificateDate').value,
-            notes: document.getElementById('modalNotes').value
-        };
-
-        if (currentEditId) {
-            const index = offices.findIndex(o => o.id === currentEditId);
-            offices[index] = { ...officeData, id: currentEditId };
-        } else {
-            const newId = Math.max(...offices.map(o => o.id), 0) + 1 || 1;
-            offices.push({ ...officeData, id: newId });
-        }
-
-        document.getElementById('officeModal').style.display = 'none';
-        renderTable();
-    });
-
-    // Close modal when clicking outside
-    window.addEventListener('click', (e) => {
-        if (e.target === document.getElementById('officeModal')) {
-            document.getElementById('officeModal').style.display = 'none';
-        }
-    });
-
-    // Initial render
-    renderTable();
+window.onload = loadOffices;
 </script>
-
 </body>
 </html>

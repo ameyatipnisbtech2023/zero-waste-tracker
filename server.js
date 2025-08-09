@@ -38,7 +38,9 @@ const officeSchema = new mongoose.Schema({
 
 const Office = mongoose.model('Office', officeSchema);
 
-// Office API Routes
+// ================= API ROUTES ================= //
+
+// Get all offices
 app.get('/api/offices', async (req, res) => {
     try {
         const offices = await Office.find();
@@ -48,6 +50,18 @@ app.get('/api/offices', async (req, res) => {
     }
 });
 
+// Get single office by ID
+app.get('/api/offices/:id', async (req, res) => {
+    try {
+        const office = await Office.findById(req.params.id);
+        if (!office) return res.status(404).json({ error: 'Office not found' });
+        res.json(office);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Create new office
 app.post('/api/offices', async (req, res) => {
     try {
         const newOffice = new Office(req.body);
@@ -58,16 +72,29 @@ app.post('/api/offices', async (req, res) => {
     }
 });
 
+// Update office
+app.put('/api/offices/:id', async (req, res) => {
+    try {
+        const updatedOffice = await Office.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updatedOffice) return res.status(404).json({ error: 'Office not found' });
+        res.json(updatedOffice);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete office
 app.delete('/api/offices/:id', async (req, res) => {
     try {
-        await Office.findByIdAndDelete(req.params.id);
+        const deleted = await Office.findByIdAndDelete(req.params.id);
+        if (!deleted) return res.status(404).json({ error: 'Office not found' });
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Serve index.html for root
+// Serve frontend
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
