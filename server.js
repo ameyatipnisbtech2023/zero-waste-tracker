@@ -19,46 +19,48 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ MongoDB connected'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Mongoose Schema & Model
-const entrySchema = new mongoose.Schema({
-    name: String,
-    category: String,
-    quantity: Number
+// Office Schema
+const officeSchema = new mongoose.Schema({
+    officeName: String,
+    department: String,
+    contactPerson: String,
+    contactEmail: String,
+    totalEmployees: Number,
+    pantryStatus: String,
+    restroomsStatus: String,
+    meetingRoomsStatus: String,
+    eventsStatus: String,
+    premisesStatus: String,
+    overallProgress: Number,
+    certificateDate: String,
+    notes: String
 });
-const Entry = mongoose.model('Entry', entrySchema);
 
-// Routes
-app.get('/api/entries', async (req, res) => {
+const Office = mongoose.model('Office', officeSchema);
+
+// Office API Routes
+app.get('/api/offices', async (req, res) => {
     try {
-        const entries = await Entry.find();
-        res.json(entries);
+        const offices = await Office.find();
+        res.json(offices);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-app.post('/api/entries', async (req, res) => {
+app.post('/api/offices', async (req, res) => {
     try {
-        const newEntry = new Entry(req.body);
-        await newEntry.save();
-        res.json(newEntry);
+        const newOffice = new Office(req.body);
+        await newOffice.save();
+        res.json(newOffice);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-app.put('/api/entries/:id', async (req, res) => {
+app.delete('/api/offices/:id', async (req, res) => {
     try {
-        const updated = await Entry.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(updated);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.delete('/api/entries/:id', async (req, res) => {
-    try {
-        await Entry.findByIdAndDelete(req.params.id);
+        await Office.findByIdAndDelete(req.params.id);
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
