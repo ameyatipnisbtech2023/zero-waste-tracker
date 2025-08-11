@@ -103,19 +103,20 @@ async function saveNewOffice() {
 }
 
 /* Dropdown generator */
-function createGroupedDropdowns(categoryName, data={}, useName=false) {
+function createGroupedDropdowns(categoryName, data = {}, useName = false) {
     let html = "";
     for (let sub of categoryOptions[categoryName]) {
-        let selectedStatus = data[sub] || "";
+        let selectedStatus = data[sub] || "Not Started"; // default here
         html += `<div class="subcategory">
                     <label>${sub}</label>
                     <select ${useName ? `name="${categoryName}_${sub}"` : ""}>
-                        ${statusOptions.map(s => `<option value="${s}" ${selectedStatus===s?"selected":""}>${s}</option>`).join("")}
+                        ${statusOptions.map(s => `<option value="${s}" ${selectedStatus === s ? "selected" : ""}>${s}</option>`).join("")}
                     </select>
                  </div>`;
     }
     return html;
 }
+
 function renderGroupedDisplay(obj) {
     if (!obj) return "";
     return Object.entries(obj).map(([sub, status]) => `<div><b>${sub}:</b> ${status}</div>`).join("");
@@ -161,16 +162,17 @@ async function loadOffices() {
 function collectFormData(container) {
     const formData = {};
     container.querySelectorAll('input, select').forEach(el => {
-        if (el.name && el.name.includes("_")) {
+        if (el.name.includes("_")) {
             const [cat, sub] = el.name.split("_");
             formData[cat + "Status"] = formData[cat + "Status"] || {};
             formData[cat + "Status"][sub] = el.value || "Not Started";
-        } else if (el.name) {
+        } else {
             formData[el.name] = el.value;
         }
     });
     return formData;
 }
+
 
 /* Edit row */
 function editRow(button) {
@@ -221,9 +223,14 @@ async function saveNewOffice() {
 async function saveRow(row) {
     const id = row.dataset.id;
     const formData = collectFormData(row);
-    await fetch(`${API_URL}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+    await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    });
     loadOffices();
 }
+
 
 /* Delete */
 async function deleteOffice(id) {
