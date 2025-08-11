@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌱 Zero Waste Office Tracker</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
-        h1 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        th, td { padding: 8px; border: 1px solid #ccc; text-align: left; vertical-align: top; }
-        th { background: #28a745; color: white; }
-        button { padding: 5px 10px; margin: 2px; cursor: pointer; }
-        .btn { background: #007bff; color: white; border: none; }
-        .btn-danger { background: #dc3545; color: white; border: none; }
-        .btn-save { background: #28a745; color: white; border: none; }
-        select, input { width: 100%; }
-        .export-section { margin-top: 20px; }
-        .subcategory { margin-bottom: 5px; }
-        /* Modal styles */
-        .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto;
-                 background-color: rgba(0,0,0,0.4); }
-        .modal-content { background: #fff; margin: 5% auto; padding: 20px; width: 80%; border-radius: 8px; }
-        .close { float: right; font-size: 28px; cursor: pointer; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 Zero Waste Office Tracker</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+    h1 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: left; vertical-align: top; }
+    th { background: #28a745; color: white; }
+    button { padding: 5px 10px; margin: 2px; cursor: pointer; }
+    .btn { background: #007bff; color: white; border: none; }
+    .btn-danger { background: #dc3545; color: white; border: none; }
+    .btn-save { background: #28a745; color: white; border: none; }
+    select, input { width: 100%; }
+    .export-section { margin-top: 20px; }
+    .subcategory { margin-bottom: 5px; }
+    .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto;
+             background-color: rgba(0,0,0,0.4); }
+    .modal-content { background: #fff; margin: 5% auto; padding: 20px; width: 80%; border-radius: 8px; }
+    .close { float: right; font-size: 28px; cursor: pointer; }
+</style>
 </head>
 <body>
 
@@ -30,7 +29,6 @@
 
 <button class="btn" onclick="openModal()">➕ Add New Office</button>
 
-<!-- Modal -->
 <div id="officeModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">&times;</span>
@@ -55,24 +53,14 @@
 </div>
 
 <table id="officeTable">
-    <thead>
-        <tr>
-            <th>Office Name</th>
-            <th>Department</th>
-            <th>Contact Person</th>
-            <th>Contact Email</th>
-            <th>Total Employees</th>
-            <th>Pantry</th>
-            <th>Restrooms</th>
-            <th>Meeting Rooms</th>
-            <th>Events</th>
-            <th>Premises</th>
-            <th>Certificate Date</th>
-            <th>Notes</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
+<thead>
+<tr>
+    <th>Office Name</th><th>Department</th><th>Contact Person</th><th>Contact Email</th><th>Total Employees</th>
+    <th>Pantry</th><th>Restrooms</th><th>Meeting Rooms</th><th>Events</th><th>Premises</th>
+    <th>Certificate Date</th><th>Notes</th><th>Actions</th>
+</tr>
+</thead>
+<tbody></tbody>
 </table>
 
 <div class="export-section">
@@ -91,18 +79,30 @@ const categoryOptions = {
 };
 const statusOptions = ["Not Started","Planned","Implemented"];
 
-/* ---------- Modal handling ---------- */
 function openModal(){
     document.getElementById('officeModal').style.display = 'block';
     for (let cat in categoryOptions) {
         document.getElementById(cat + 'Inputs').innerHTML = createGroupedDropdowns(cat, {}, true);
     }
-}
-function closeModal(){
-    document.getElementById('officeModal').style.display = 'none';
+    // prefill dropdowns to "Not Started"
+    document.querySelectorAll('#officeForm select').forEach(sel => sel.value = "Not Started");
 }
 
-/* ---------- UI rendering ---------- */
+function closeModal(){
+    document.getElementById('officeModal').style.display = 'none';
+    document.getElementById('officeForm').reset();
+    document.querySelectorAll('#officeForm select').forEach(sel => sel.value = "Not Started");
+}
+
+async function saveNewOffice() {
+    const form = document.getElementById('officeForm');
+    const formData = collectFormData(form);
+    await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+    closeModal();
+    loadOffices();
+}
+
+/* Dropdown generator */
 function createGroupedDropdowns(categoryName, data={}, useName=false) {
     let html = "";
     for (let sub of categoryOptions[categoryName]) {
@@ -110,156 +110,122 @@ function createGroupedDropdowns(categoryName, data={}, useName=false) {
         html += `<div class="subcategory">
                     <label>${sub}</label>
                     <select ${useName ? `name="${categoryName}_${sub}"` : ""}>
-                        <option value="">--Select Status--</option>
-                        ${statusOptions.map(s => `<option value="${s}" ${selectedStatus === s ? "selected":""}>${s}</option>`).join("")}
+                        ${statusOptions.map(s => `<option value="${s}" ${selectedStatus===s?"selected":""}>${s}</option>`).join("")}
                     </select>
                  </div>`;
     }
     return html;
 }
-
 function renderGroupedDisplay(obj) {
     if (!obj) return "";
     return Object.entries(obj).map(([sub, status]) => `<div><b>${sub}:</b> ${status}</div>`).join("");
 }
 
-/* ---------- Load offices ---------- */
+/* Load offices */
 async function loadOffices() {
     const res = await fetch(API_URL);
     const offices = await res.json();
     const tbody = document.querySelector('#officeTable tbody');
     tbody.innerHTML = '';
-    offices.forEach(office => {
+    offices.forEach(o => {
         const row = document.createElement('tr');
-        row.dataset.id = office._id;
+        row.dataset.id = o._id;
+        row.dataset.pantry = JSON.stringify(o.pantryStatus || {});
+        row.dataset.restrooms = JSON.stringify(o.restroomsStatus || {});
+        row.dataset.meetingRooms = JSON.stringify(o.meetingRoomsStatus || {});
+        row.dataset.events = JSON.stringify(o.eventsStatus || {});
+        row.dataset.premises = JSON.stringify(o.premisesStatus || {});
         row.innerHTML = `
-            <td>${office.officeName || ''}</td>
-            <td>${office.department || ''}</td>
-            <td>${office.contactPerson || ''}</td>
-            <td>${office.contactEmail || ''}</td>
-            <td>${office.totalEmployees || ''}</td>
-            <td>${renderGroupedDisplay(office.pantryStatus)}</td>
-            <td>${renderGroupedDisplay(office.restroomsStatus)}</td>
-            <td>${renderGroupedDisplay(office.meetingRoomsStatus)}</td>
-            <td>${renderGroupedDisplay(office.eventsStatus)}</td>
-            <td>${renderGroupedDisplay(office.premisesStatus)}</td>
-            <td>${office.certificateDate || ''}</td>
-            <td>${office.notes || ''}</td>
+            <td>${o.officeName||''}</td>
+            <td>${o.department||''}</td>
+            <td>${o.contactPerson||''}</td>
+            <td>${o.contactEmail||''}</td>
+            <td>${o.totalEmployees||''}</td>
+            <td>${renderGroupedDisplay(o.pantryStatus)}</td>
+            <td>${renderGroupedDisplay(o.restroomsStatus)}</td>
+            <td>${renderGroupedDisplay(o.meetingRoomsStatus)}</td>
+            <td>${renderGroupedDisplay(o.eventsStatus)}</td>
+            <td>${renderGroupedDisplay(o.premisesStatus)}</td>
+            <td>${o.certificateDate||''}</td>
+            <td>${o.notes||''}</td>
             <td>
                 <button class="btn" onclick="editRow(this)">Edit</button>
-                <button class="btn-danger" onclick="deleteOffice('${office._id}')">Delete</button>
+                <button class="btn-danger" onclick="deleteOffice('${o._id}')">Delete</button>
             </td>
         `;
         tbody.appendChild(row);
     });
 }
 
-/* ---------- Edit & Save inline ---------- */
-function editRow(button) {
-    const row = button.closest('tr');
-    const cells = row.querySelectorAll('td');
-    cells[0].innerHTML = `<input name="officeName" value="${cells[0].innerText}">`;
-    cells[1].innerHTML = `<input name="department" value="${cells[1].innerText}">`;
-    cells[2].innerHTML = `<input name="contactPerson" value="${cells[2].innerText}">`;
-    cells[3].innerHTML = `<input name="contactEmail" value="${cells[3].innerText}">`;
-    cells[4].innerHTML = `<input name="totalEmployees" type="number" value="${cells[4].innerText}">`;
-    cells[5].innerHTML = createGroupedDropdowns("pantry", {}, true);
-    cells[6].innerHTML = createGroupedDropdowns("restrooms", {}, true);
-    cells[7].innerHTML = createGroupedDropdowns("meetingRooms", {}, true);
-    cells[8].innerHTML = createGroupedDropdowns("events", {}, true);
-    cells[9].innerHTML = createGroupedDropdowns("premises", {}, true);
-    cells[10].innerHTML = `<input name="certificateDate" type="date" value="${cells[10].innerText}">`;
-    cells[11].innerHTML = `<input name="notes" value="${cells[11].innerText}">`;
-    button.textContent = 'Save';
-    button.className = 'btn-save';
-    button.onclick = () => saveRow(row);
-}
-
-async function saveRow(row) {
-    const id = row.dataset.id;
-    const formData = {};
-    row.querySelectorAll('input, select').forEach(el => {
-        if (el.name.includes("_")) {
-            const [cat, sub] = el.name.split("_");
-            formData[cat + "Status"] = formData[cat + "Status"] || {};
-            formData[cat + "Status"][sub] = el.value;
-        } else {
-            formData[el.name] = el.value;
-        }
-    });
-    await fetch(`${API_URL}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-    });
-    loadOffices();
-}
-
-/* ---------- Add new office from modal ---------- */
-async function saveNewOffice() {
-    const form = document.getElementById('officeForm');
-    const formData = {};
-    form.querySelectorAll('input, select').forEach(el => {
-        if (el.name.includes("_")) {
-            const [cat, sub] = el.name.split("_");
-            formData[cat + "Status"] = formData[cat + "Status"] || {};
-            formData[cat + "Status"][sub] = el.value;
-        } else {
-            formData[el.name] = el.value;
-        }
-    });
-    await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-    });
-    closeModal();
-    loadOffices();
-}
-
-// ---------------- Helper to collect form data ----------------
+/* Collect form data */
 function collectFormData(container) {
     const formData = {};
     container.querySelectorAll('input, select').forEach(el => {
-        if (el.name.includes("_")) {
+        if (el.name && el.name.includes("_")) {
             const [cat, sub] = el.name.split("_");
             formData[cat + "Status"] = formData[cat + "Status"] || {};
-            formData[cat + "Status"][sub] = el.value || "Not Started"; // default
-        } else {
+            formData[cat + "Status"][sub] = el.value || "Not Started";
+        } else if (el.name) {
             formData[el.name] = el.value;
         }
     });
     return formData;
 }
 
-// ---------------- Save New Office ----------------
+/* Edit row */
+function editRow(button) {
+    const row = button.closest('tr');
+    const cells = row.querySelectorAll('td');
+
+    // Get existing statuses for prefill
+    const id = row.dataset.id;
+    fetch(`${API_URL}/${id}`)
+        .then(res => res.json())
+        .then(office => {
+            cells[0].innerHTML = `<input name="officeName" value="${office.officeName || ''}">`;
+            cells[1].innerHTML = `<input name="department" value="${office.department || ''}">`;
+            cells[2].innerHTML = `<input name="contactPerson" value="${office.contactPerson || ''}">`;
+            cells[3].innerHTML = `<input name="contactEmail" value="${office.contactEmail || ''}">`;
+            cells[4].innerHTML = `<input name="totalEmployees" type="number" value="${office.totalEmployees || ''}">`;
+
+            cells[5].innerHTML = createGroupedDropdowns("pantry", office.pantryStatus || {}, true);
+            cells[6].innerHTML = createGroupedDropdowns("restrooms", office.restroomsStatus || {}, true);
+            cells[7].innerHTML = createGroupedDropdowns("meetingRooms", office.meetingRoomsStatus || {}, true);
+            cells[8].innerHTML = createGroupedDropdowns("events", office.eventsStatus || {}, true);
+            cells[9].innerHTML = createGroupedDropdowns("premises", office.premisesStatus || {}, true);
+
+            // Prefill "Not Started" for any empty dropdown
+            row.querySelectorAll('select').forEach(sel => {
+                if (!sel.value) sel.value = "Not Started";
+            });
+
+            cells[10].innerHTML = `<input name="certificateDate" type="date" value="${office.certificateDate || ''}">`;
+            cells[11].innerHTML = `<input name="notes" value="${office.notes || ''}">`;
+
+            button.textContent = 'Save';
+            button.className = 'btn-save';
+            button.onclick = () => saveRow(row);
+        });
+}
+
+
+/* Save new office */
 async function saveNewOffice() {
     const form = document.getElementById('officeForm');
     const formData = collectFormData(form);
-
-    await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-    });
-    closeModal();
-    loadOffices();
+    await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+    closeModal(); loadOffices();
 }
 
-// ---------------- Save Edited Row ----------------
+/* Save edited row */
 async function saveRow(row) {
     const id = row.dataset.id;
     const formData = collectFormData(row);
-
-    await fetch(`${API_URL}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-    });
+    await fetch(`${API_URL}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
     loadOffices();
 }
 
-/* ---------- Delete ---------- */
+/* Delete */
 async function deleteOffice(id) {
     if (confirm('Are you sure you want to delete this office?')) {
         await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
@@ -267,47 +233,31 @@ async function deleteOffice(id) {
     }
 }
 
-/* ---------- Export ---------- */
+/* Export */
 function exportToCSV() {
     fetch(API_URL).then(res => res.json()).then(data => {
         const headers = ["Office Name","Department","Contact Person","Contact Email","Total Employees"];
-        Object.keys(categoryOptions).forEach(cat => {
-            categoryOptions[cat].forEach(sub => headers.push(`${cat}_${sub}`));
-        });
+        Object.keys(categoryOptions).forEach(cat => categoryOptions[cat].forEach(sub => headers.push(`${cat}_${sub}`)));
         headers.push("Certificate Date","Notes");
         const csvRows = [headers.join(',')];
         data.forEach(o => {
             let row = [o.officeName||'', o.department||'', o.contactPerson||'', o.contactEmail||'', o.totalEmployees||''];
-            Object.keys(categoryOptions).forEach(cat => {
-                categoryOptions[cat].forEach(sub => {
-                    row.push((o[cat + "Status"] && o[cat + "Status"][sub]) || '');
-                });
-            });
+            Object.keys(categoryOptions).forEach(cat => categoryOptions[cat].forEach(sub => row.push((o[cat+"Status"] && o[cat+"Status"][sub]) || '')));
             row.push(o.certificateDate||'', o.notes||'');
             csvRows.push(row.map(v => `"${v}"`).join(','));
         });
         const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'offices.csv';
-        a.click();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'offices.csv'; a.click();
     });
 }
-
 function exportToJSON() {
     fetch(API_URL).then(res => res.json()).then(data => {
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'offices.json';
-        a.click();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'offices.json'; a.click();
     });
 }
 
 window.onload = loadOffices;
 </script>
-
 </body>
 </html>
