@@ -19,33 +19,20 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ MongoDB connected'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Schema
+// Updated Schema - store statuses as key:value maps
 const officeSchema = new mongoose.Schema({
     officeName: String,
     department: String,
     contactPerson: String,
     contactEmail: String,
     totalEmployees: Number,
-    pantry: {
-        items: [String],
-        status: String
-    },
-    restrooms: {
-        items: [String],
-        status: String
-    },
-    meetingRooms: {
-        items: [String],
-        status: String
-    },
-    events: {
-        items: [String],
-        status: String
-    },
-    premises: {
-        items: [String],
-        status: String
-    },
+
+    pantryStatus: { type: Map, of: String },
+    restroomsStatus: { type: Map, of: String },
+    meetingRoomsStatus: { type: Map, of: String },
+    eventsStatus: { type: Map, of: String },
+    premisesStatus: { type: Map, of: String },
+
     certificateDate: String,
     notes: String
 });

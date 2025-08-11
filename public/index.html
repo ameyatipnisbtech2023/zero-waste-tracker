@@ -161,18 +161,21 @@ async function loadOffices() {
 /* Collect form data */
 function collectFormData(container) {
     const formData = {};
+    for (let cat in categoryOptions) {
+        formData[cat + "Status"] = {};
+    }
+
     container.querySelectorAll('input, select').forEach(el => {
         if (el.name.includes("_")) {
             const [cat, sub] = el.name.split("_");
-            formData[cat + "Status"] = formData[cat + "Status"] || {};
             formData[cat + "Status"][sub] = el.value || "Not Started";
         } else {
             formData[el.name] = el.value;
         }
     });
+
     return formData;
 }
-
 
 /* Edit row */
 function editRow(button) {
