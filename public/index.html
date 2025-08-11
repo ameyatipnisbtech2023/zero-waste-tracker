@@ -119,7 +119,16 @@ function createGroupedDropdowns(categoryName, data = {}, useName = false) {
 
 function renderGroupedDisplay(obj) {
     if (!obj) return "";
-    return Object.entries(obj).map(([sub, status]) => `<div><b>${sub}:</b> ${status}</div>`).join("");
+    let implementedCount = 0;
+    const total = Object.keys(categoryOptions[Object.keys(categoryOptions).find(cat => Object.keys(obj).includes(categoryOptions[cat][0]))] || {}).length || 5;
+
+    let html = Object.entries(obj).map(([sub, status]) => {
+        if (status === "Implemented") implementedCount++;
+        return `<div><b>${sub}:</b> ${status}</div>`;
+    }).join("");
+
+    html += `<div><b>Score:</b> ${implementedCount}/${total}</div>`;
+    return html;
 }
 
 /* Load offices */
