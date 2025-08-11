@@ -76,7 +76,11 @@ app.post('/api/offices', async (req, res) => {
 // Update Office
 app.put('/api/offices/:id', async (req, res) => {
     try {
-        const updatedOffice = await Office.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updatedOffice = await Office.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
         res.json(updatedOffice);
     } catch (err) {
         res.status(500).json({ error: err.message });
