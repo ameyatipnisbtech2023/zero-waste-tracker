@@ -217,6 +217,48 @@ async function saveNewOffice() {
     loadOffices();
 }
 
+// ---------------- Helper to collect form data ----------------
+function collectFormData(container) {
+    const formData = {};
+    container.querySelectorAll('input, select').forEach(el => {
+        if (el.name.includes("_")) {
+            const [cat, sub] = el.name.split("_");
+            formData[cat + "Status"] = formData[cat + "Status"] || {};
+            formData[cat + "Status"][sub] = el.value || "Not Started"; // default
+        } else {
+            formData[el.name] = el.value;
+        }
+    });
+    return formData;
+}
+
+// ---------------- Save New Office ----------------
+async function saveNewOffice() {
+    const form = document.getElementById('officeForm');
+    const formData = collectFormData(form);
+
+    await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    });
+    closeModal();
+    loadOffices();
+}
+
+// ---------------- Save Edited Row ----------------
+async function saveRow(row) {
+    const id = row.dataset.id;
+    const formData = collectFormData(row);
+
+    await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    });
+    loadOffices();
+}
+
 /* ---------- Delete ---------- */
 async function deleteOffice(id) {
     if (confirm('Are you sure you want to delete this office?')) {
