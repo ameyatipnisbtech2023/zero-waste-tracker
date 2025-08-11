@@ -8,221 +8,287 @@
         body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
         h1 { text-align: center; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
+        th, td { padding: 8px; border: 1px solid #ccc; text-align: left; vertical-align: top; }
         th { background: #28a745; color: white; }
         button { padding: 5px 10px; margin: 2px; cursor: pointer; }
         .btn { background: #007bff; color: white; border: none; }
         .btn-danger { background: #dc3545; color: white; border: none; }
         .btn-save { background: #28a745; color: white; border: none; }
+        select, input { width: 100%; }
         .export-section { margin-top: 20px; }
+        .subcategory { margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-    <h1>🌱 Zero Waste Office Tracker</h1>
+<h1>🌱 Zero Waste Office Tracker</h1>
 
-    <button class="btn" onclick="addNewRow()">➕ Add New Office</button>
+<button class="btn" onclick="addNewRow()">➕ Add New Office</button>
 
-    <table id="officeTable">
-        <thead>
-            <tr>
-                <th>Office Name</th>
-                <th>Department</th>
-                <th>Contact Person</th>
-                <th>Contact Email</th>
-                <th>Total Employees</th>
-                <th>Pantry</th>
-                <th>Restrooms</th>
-                <th>Meeting Rooms</th>
-                <th>Events</th>
-                <th>Premises</th>
-                <th>Certificate Date</th>
-                <th>Notes</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+<table id="officeTable">
+    <thead>
+        <tr>
+            <th>Office Name</th>
+            <th>Department</th>
+            <th>Contact Person</th>
+            <th>Contact Email</th>
+            <th>Total Employees</th>
+            <th>Pantry</th>
+            <th>Restrooms</th>
+            <th>Meeting Rooms</th>
+            <th>Events</th>
+            <th>Premises</th>
+            <th>Certificate Date</th>
+            <th>Notes</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
 
-    <div class="export-section">
-        <button class="btn" onclick="exportToCSV()">📊 Export to CSV</button>
-        <button class="btn" onclick="exportToJSON()">💾 Export to JSON</button>
-    </div>
+<div class="export-section">
+    <button class="btn" onclick="exportToCSV()">📊 Export to CSV</button>
+    <button class="btn" onclick="exportToJSON()">💾 Export to JSON</button>
+</div>
 
-    <script>
-        const API_URL = '/api/offices';
+<script>
+const API_URL = '/api/offices';
 
-        async function loadOffices() {
-            const res = await fetch(API_URL);
-            const offices = await res.json();
-            const tbody = document.querySelector('#officeTable tbody');
-            tbody.innerHTML = '';
-            offices.forEach(office => {
-                const row = document.createElement('tr');
-                row.dataset.id = office._id;
-                row.innerHTML = `
-                    <td>${office.officeName || ''}</td>
-                    <td>${office.department || ''}</td>
-                    <td>${office.contactPerson || ''}</td>
-                    <td>${office.contactEmail || ''}</td>
-                    <td>${office.totalEmployees || ''}</td>
-                    <td>${office.pantryStatus || ''}</td>
-                    <td>${office.restroomsStatus || ''}</td>
-                    <td>${office.meetingRoomsStatus || ''}</td>
-                    <td>${office.eventsStatus || ''}</td>
-                    <td>${office.premisesStatus || ''}</td>
-                    <td>${office.certificateDate || ''}</td>
-                    <td>${office.Notes || ''}</td>
-                    <td>
-                        <button class="btn" onclick="editRow(this)">Edit</button>
-                        <button class="btn-danger" onclick="deleteOffice('${office._id}')">Delete</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
+const categoryOptions = {
+    pantry: ["Plates & Cutlery","Water Bottles","Cups & Glasses","Food Leftovers","Cleaners"],
+    restrooms: ["Tissue Papers","Toilet Rolls","Sanitary Waste","Water Saving Devices","Cleaners"],
+    meetingRooms: ["Cups & Glasses","Water Bottles","Printouts & Stationery","Plates & Cutlery","Cleaners"],
+    events: ["Venue & Stage Decorations","Water Bottles","Displays & Badges","Food Waste","Plates & Cutlery"],
+    premises: ["E-Waste","Garden Matter","Gray Water","Storm Water","Food Leftovers"]
+};
+
+const statusOptions = ["Not Started","Planned","Implemented"];
+
+function createCategoryCell(selectedData = {}) {
+    let html = "";
+    for (let cat of Object.keys(selectedData).length ? Object.keys(selectedData) : Object.values(categoryOptions).flat()) {
+        let parentCategory = Object.keys(categoryOptions).find(k => categoryOptions[k].includes(cat));
+        if (!parentCategory) continue;
+    }
+    return html;
+}
+
+function createGroupedDropdowns(categoryName, data = {}) {
+    let html = "";
+    for (let sub of categoryOptions[categoryName]) {
+        let selectedStatus = data[sub] || "";
+        html += `<div class="subcategory">
+                    <label>${sub}</label>
+                    <select>
+                        <option value="">--Select Status--</option>
+                        ${statusOptions.map(s => `<option value="${s}" ${selectedStatus === s ? "selected":""}>${s}</option>`).join("")}
+                    </select>
+                 </div>`;
+    }
+    return html;
+}
+
+async function loadOffices() {
+    const res = await fetch(API_URL);
+    const offices = await res.json();
+    const tbody = document.querySelector('#officeTable tbody');
+    tbody.innerHTML = '';
+    offices.forEach(office => {
+        const row = document.createElement('tr');
+        row.dataset.id = office._id;
+        row.innerHTML = `
+            <td>${office.officeName || ''}</td>
+            <td>${office.department || ''}</td>
+            <td>${office.contactPerson || ''}</td>
+            <td>${office.contactEmail || ''}</td>
+            <td>${office.totalEmployees || ''}</td>
+            <td>${renderGroupedDisplay(office.pantryStatus)}</td>
+            <td>${renderGroupedDisplay(office.restroomsStatus)}</td>
+            <td>${renderGroupedDisplay(office.meetingRoomsStatus)}</td>
+            <td>${renderGroupedDisplay(office.eventsStatus)}</td>
+            <td>${renderGroupedDisplay(office.premisesStatus)}</td>
+            <td>${office.certificateDate || ''}</td>
+            <td>${office.notes || ''}</td>
+            <td>
+                <button class="btn" onclick="editRow(this)">Edit</button>
+                <button class="btn-danger" onclick="deleteOffice('${office._id}')">Delete</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function renderGroupedDisplay(obj) {
+    if (!obj) return "";
+    return Object.entries(obj).map(([sub, status]) => `<div><b>${sub}:</b> ${status}</div>`).join("");
+}
+
+function editRow(button) {
+    const row = button.closest('tr');
+    const cells = row.querySelectorAll('td');
+    // Text inputs
+    cells[0].innerHTML = `<input type="text" value="${cells[0].innerText}">`;
+    cells[1].innerHTML = `<input type="text" value="${cells[1].innerText}">`;
+    cells[2].innerHTML = `<input type="text" value="${cells[2].innerText}">`;
+    cells[3].innerHTML = `<input type="text" value="${cells[3].innerText}">`;
+    cells[4].innerHTML = `<input type="number" value="${cells[4].innerText}">`;
+    // Grouped dropdowns
+    cells[5].innerHTML = createGroupedDropdowns("pantry");
+    cells[6].innerHTML = createGroupedDropdowns("restrooms");
+    cells[7].innerHTML = createGroupedDropdowns("meetingRooms");
+    cells[8].innerHTML = createGroupedDropdowns("events");
+    cells[9].innerHTML = createGroupedDropdowns("premises");
+    // Date
+    cells[10].innerHTML = `<input type="date" value="${cells[10].innerText}">`;
+    // Notes
+    cells[11].innerHTML = `<input type="text" value="${cells[11].innerText}">`;
+
+    button.textContent = 'Save';
+    button.className = 'btn-save';
+    button.onclick = () => saveRow(row);
+}
+
+async function saveRow(row) {
+    const id = row.dataset.id;
+    const inputs = row.querySelectorAll('input');
+    const selects = row.querySelectorAll('td select');
+    const updatedOffice = {
+        officeName: inputs[0].value,
+        department: inputs[1].value,
+        contactPerson: inputs[2].value,
+        contactEmail: inputs[3].value,
+        totalEmployees: inputs[4].value,
+        pantryStatus: getCategoryData(selects, "pantry"),
+        restroomsStatus: getCategoryData(selects, "restrooms"),
+        meetingRoomsStatus: getCategoryData(selects, "meetingRooms"),
+        eventsStatus: getCategoryData(selects, "events"),
+        premisesStatus: getCategoryData(selects, "premises"),
+        certificateDate: inputs[5].value,
+        notes: inputs[6].value
+    };
+    await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedOffice)
+    });
+    loadOffices();
+}
+
+function getCategoryData(selects, categoryName) {
+    const subs = categoryOptions[categoryName];
+    let obj = {};
+    subs.forEach((sub, i) => {
+        obj[sub] = selects.shift().value;
+    });
+    return obj;
+}
+
+async function deleteOffice(id) {
+    if (confirm('Are you sure you want to delete this office?')) {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        loadOffices();
+    }
+}
+
+function addNewRow() {
+    const tbody = document.querySelector('#officeTable tbody');
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td><input type="text"></td>
+        <td><input type="text"></td>
+        <td><input type="text"></td>
+        <td><input type="text"></td>
+        <td><input type="number"></td>
+        <td>${createGroupedDropdowns("pantry")}</td>
+        <td>${createGroupedDropdowns("restrooms")}</td>
+        <td>${createGroupedDropdowns("meetingRooms")}</td>
+        <td>${createGroupedDropdowns("events")}</td>
+        <td>${createGroupedDropdowns("premises")}</td>
+        <td><input type="date"></td>
+        <td><input type="text"></td>
+        <td><button class="btn-save" onclick="saveNewRow(this)">Save</button></td>
+    `;
+    tbody.appendChild(row);
+}
+
+async function saveNewRow(button) {
+    const row = button.closest('tr');
+    const inputs = row.querySelectorAll('input');
+    const selects = row.querySelectorAll('td select');
+    const newOffice = {
+        officeName: inputs[0].value,
+        department: inputs[1].value,
+        contactPerson: inputs[2].value,
+        contactEmail: inputs[3].value,
+        totalEmployees: inputs[4].value,
+        pantryStatus: getCategoryData(selects, "pantry"),
+        restroomsStatus: getCategoryData(selects, "restrooms"),
+        meetingRoomsStatus: getCategoryData(selects, "meetingRooms"),
+        eventsStatus: getCategoryData(selects, "events"),
+        premisesStatus: getCategoryData(selects, "premises"),
+        certificateDate: inputs[5].value,
+        notes: inputs[6].value
+    };
+    await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newOffice)
+    });
+    loadOffices();
+}
+
+function exportToCSV() {
+    fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+            const headers = ["Office Name","Department","Contact Person","Contact Email","Total Employees"];
+            Object.keys(categoryOptions).forEach(cat => {
+                categoryOptions[cat].forEach(sub => headers.push(`${cat}_${sub}`));
             });
-        }
+            headers.push("Certificate Date","Notes");
 
-        function editRow(button) {
-            const row = button.closest('tr');
-            const cells = row.querySelectorAll('td');
-            for (let i = 0; i < cells.length - 1; i++) {
-                const value = cells[i].innerText;
-                if (i === 10) { // Date field
-                    cells[i].innerHTML = `<input type="date" value="${value}">`;
-                } else {
-                    cells[i].innerHTML = `<input type="text" value="${value}">`;
-                }
-            }
-            button.textContent = 'Save';
-            button.className = 'btn-save';
-            button.onclick = () => saveRow(row);
-        }
-
-        async function saveRow(row) {
-            const id = row.dataset.id;
-            const inputs = row.querySelectorAll('input');
-            const updatedOffice = {
-                officeName: inputs[0].value,
-                department: inputs[1].value,
-                contactPerson: inputs[2].value,
-                contactEmail: inputs[3].value,
-                totalEmployees: inputs[4].value,
-                pantryStatus: inputs[5].value,
-                restroomsStatus: inputs[6].value,
-                meetingRoomsStatus: inputs[7].value,
-                eventsStatus: inputs[8].value,
-                premisesStatus: inputs[9].value,
-                certificateDate: inputs[10].value,
-                Notes: inputs[11].value
-            };
-            await fetch(`${API_URL}/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedOffice)
-            });
-            loadOffices();
-        }
-
-        async function deleteOffice(id) {
-            if (confirm('Are you sure you want to delete this office?')) {
-                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-                loadOffices();
-            }
-        }
-
-        function addNewRow() {
-            const tbody = document.querySelector('#officeTable tbody');
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="number"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td><input type="date"></td>
-                <td><input type="text"></td>
-                <td><button class="btn-save" onclick="saveNewRow(this)">Save</button></td>
-            `;
-            tbody.appendChild(row);
-        }
-
-        async function saveNewRow(button) {
-            const row = button.closest('tr');
-            const inputs = row.querySelectorAll('input');
-            const newOffice = {
-                officeName: inputs[0].value,
-                department: inputs[1].value,
-                contactPerson: inputs[2].value,
-                contactEmail: inputs[3].value,
-                totalEmployees: inputs[4].value,
-                pantryStatus: inputs[5].value,
-                restroomsStatus: inputs[6].value,
-                meetingRoomsStatus: inputs[7].value,
-                eventsStatus: inputs[8].value,
-                premisesStatus: inputs[9].value,
-                certificateDate: inputs[10].value,
-                Notes: inputs[11].value
-            };
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newOffice)
-            });
-            loadOffices();
-        }
-
-        function exportToCSV() {
-            fetch(API_URL)
-                .then(res => res.json())
-                .then(data => {
-                    const csvRows = [];
-                    const headers = ["Office Name","Department","Contact Person","Contact Email","Total Employees","Pantry","Restrooms","Meeting Rooms","Events","Premises","Certificate Date","Notes"];
-                    csvRows.push(headers.join(','));
-                    for (const office of data) {
-                        csvRows.push([
-                            office.officeName || '',
-                            office.department || '',
-                            office.contactPerson || '',
-                            office.contactEmail || '',
-                            office.totalEmployees || '',
-                            office.pantryStatus || '',
-                            office.restroomsStatus || '',
-                            office.meetingRoomsStatus || '',
-                            office.eventsStatus || '',
-                            office.premisesStatus || '',
-                            office.certificateDate || '',
-                            office.Notes || ''
-                        ].map(v => `"${v}"`).join(','));
-                    }
-                    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.setAttribute('href', url);
-                    a.setAttribute('download', 'offices.csv');
-                    a.click();
+            const csvRows = [headers.join(',')];
+            data.forEach(o => {
+                let row = [
+                    o.officeName || '',
+                    o.department || '',
+                    o.contactPerson || '',
+                    o.contactEmail || '',
+                    o.totalEmployees || ''
+                ];
+                Object.keys(categoryOptions).forEach(cat => {
+                    categoryOptions[cat].forEach(sub => {
+                        row.push((o[cat + "Status"] && o[cat + "Status"][sub]) || '');
+                    });
                 });
-        }
+                row.push(o.certificateDate || '', o.notes || '');
+                csvRows.push(row.map(v => `"${v}"`).join(','));
+            });
 
-        function exportToJSON() {
-            fetch(API_URL)
-                .then(res => res.json())
-                .then(data => {
-                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.setAttribute('href', url);
-                    a.setAttribute('download', 'offices.json');
-                    a.click();
-                });
-        }
+            const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'offices.csv';
+            a.click();
+        });
+}
 
-        window.onload = loadOffices;
-    </script>
+function exportToJSON() {
+    fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'offices.json';
+            a.click();
+        });
+}
+
+window.onload = loadOffices;
+</script>
 
 </body>
 </html>
