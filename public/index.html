@@ -1,29 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌱 Zero Waste Office Tracker</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
-        h1 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        th, td { padding: 8px; border: 1px solid #ccc; text-align: left; vertical-align: top; }
-        th { background: #28a745; color: white; }
-        button { padding: 5px 10px; margin: 2px; cursor: pointer; }
-        .btn { background: #007bff; color: white; border: none; }
-        .btn-danger { background: #dc3545; color: white; border: none; }
-        .btn-save { background: #28a745; color: white; border: none; }
-        select, input { width: 100%; }
-        .export-section { margin-top: 20px; }
-        .subcategory { margin-bottom: 5px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 Zero Waste Office Tracker</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+    h1 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: left; vertical-align: top; }
+    th { background: #28a745; color: white; }
+    button { padding: 5px 10px; margin: 2px; cursor: pointer; }
+    .btn { background: #007bff; color: white; border: none; }
+    .btn-danger { background: #dc3545; color: white; border: none; }
+    .btn-save { background: #28a745; color: white; border: none; }
+    select, input { width: 100%; }
+    .subcategory { margin-bottom: 5px; }
+    .export-section { margin-top: 20px; }
+    /* Modal styles */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background: rgba(0,0,0,0.5); }
+    .modal-content { background: #fff; margin: 5% auto; padding: 20px; border-radius: 8px; width: 80%; max-height: 90vh; overflow-y: auto; }
+    .modal-header { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+    .modal-close { float: right; font-size: 20px; cursor: pointer; }
+</style>
 </head>
 <body>
 
 <h1>🌱 Zero Waste Office Tracker</h1>
 
-<button class="btn" onclick="addNewRow()">➕ Add New Office</button>
+<button class="btn" onclick="openModal()">➕ Add New Office</button>
 
 <table id="officeTable">
     <thead>
@@ -51,6 +56,35 @@
     <button class="btn" onclick="exportToJSON()">💾 Export to JSON</button>
 </div>
 
+<!-- Modal for Add New Office -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <div class="modal-header">➕ Add New Office</div>
+        <div>
+            <label>Office Name</label><input type="text" id="new_officeName">
+            <label>Department</label><input type="text" id="new_department">
+            <label>Contact Person</label><input type="text" id="new_contactPerson">
+            <label>Contact Email</label><input type="text" id="new_contactEmail">
+            <label>Total Employees</label><input type="number" id="new_totalEmployees">
+            <h3>Pantry</h3>
+            <div id="new_pantry"></div>
+            <h3>Restrooms</h3>
+            <div id="new_restrooms"></div>
+            <h3>Meeting Rooms</h3>
+            <div id="new_meetingRooms"></div>
+            <h3>Events</h3>
+            <div id="new_events"></div>
+            <h3>Premises</h3>
+            <div id="new_premises"></div>
+            <label>Certificate Date</label><input type="date" id="new_certificateDate">
+            <label>Notes</label><input type="text" id="new_notes">
+        </div>
+        <br>
+        <button class="btn-save" onclick="saveNewOffice()">Save Office</button>
+    </div>
+</div>
+
 <script>
 const API_URL = '/api/offices';
 
@@ -63,15 +97,6 @@ const categoryOptions = {
 };
 
 const statusOptions = ["Not Started","Planned","Implemented"];
-
-function createCategoryCell(selectedData = {}) {
-    let html = "";
-    for (let cat of Object.keys(selectedData).length ? Object.keys(selectedData) : Object.values(categoryOptions).flat()) {
-        let parentCategory = Object.keys(categoryOptions).find(k => categoryOptions[k].includes(cat));
-        if (!parentCategory) continue;
-    }
-    return html;
-}
 
 function createGroupedDropdowns(categoryName, data = {}) {
     let html = "";
@@ -126,23 +151,18 @@ function renderGroupedDisplay(obj) {
 function editRow(button) {
     const row = button.closest('tr');
     const cells = row.querySelectorAll('td');
-    // Text inputs
     cells[0].innerHTML = `<input type="text" value="${cells[0].innerText}">`;
     cells[1].innerHTML = `<input type="text" value="${cells[1].innerText}">`;
     cells[2].innerHTML = `<input type="text" value="${cells[2].innerText}">`;
     cells[3].innerHTML = `<input type="text" value="${cells[3].innerText}">`;
     cells[4].innerHTML = `<input type="number" value="${cells[4].innerText}">`;
-    // Grouped dropdowns
     cells[5].innerHTML = createGroupedDropdowns("pantry");
     cells[6].innerHTML = createGroupedDropdowns("restrooms");
     cells[7].innerHTML = createGroupedDropdowns("meetingRooms");
     cells[8].innerHTML = createGroupedDropdowns("events");
     cells[9].innerHTML = createGroupedDropdowns("premises");
-    // Date
     cells[10].innerHTML = `<input type="date" value="${cells[10].innerText}">`;
-    // Notes
     cells[11].innerHTML = `<input type="text" value="${cells[11].innerText}">`;
-
     button.textContent = 'Save';
     button.className = 'btn-save';
     button.onclick = () => saveRow(row);
@@ -178,62 +198,58 @@ function getCategoryData(selects, categoryName) {
     const subs = categoryOptions[categoryName];
     let obj = {};
     subs.forEach((sub, i) => {
-        obj[sub] = selects.shift().value;
+        obj[sub] = selects[i].value || "";
     });
+    // Remove the processed selects from the NodeList for the next category
+    for (let i = 0; i < subs.length; i++) {
+        selects.shift();
+    }
     return obj;
 }
 
+
 async function deleteOffice(id) {
-    if (confirm('Are you sure you want to delete this office?')) {
+    if (confirm('Are you sure?')) {
         await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         loadOffices();
     }
 }
 
-function addNewRow() {
-    const tbody = document.querySelector('#officeTable tbody');
-    const row = document.createElement('tr');
-    row.innerHTML = `
-        <td><input type="text"></td>
-        <td><input type="text"></td>
-        <td><input type="text"></td>
-        <td><input type="text"></td>
-        <td><input type="number"></td>
-        <td>${createGroupedDropdowns("pantry")}</td>
-        <td>${createGroupedDropdowns("restrooms")}</td>
-        <td>${createGroupedDropdowns("meetingRooms")}</td>
-        <td>${createGroupedDropdowns("events")}</td>
-        <td>${createGroupedDropdowns("premises")}</td>
-        <td><input type="date"></td>
-        <td><input type="text"></td>
-        <td><button class="btn-save" onclick="saveNewRow(this)">Save</button></td>
-    `;
-    tbody.appendChild(row);
+function openModal() {
+    document.getElementById('addModal').style.display = 'block';
+    document.getElementById('new_pantry').innerHTML = createGroupedDropdowns("pantry");
+    document.getElementById('new_restrooms').innerHTML = createGroupedDropdowns("restrooms");
+    document.getElementById('new_meetingRooms').innerHTML = createGroupedDropdowns("meetingRooms");
+    document.getElementById('new_events').innerHTML = createGroupedDropdowns("events");
+    document.getElementById('new_premises').innerHTML = createGroupedDropdowns("premises");
 }
 
-async function saveNewRow(button) {
-    const row = button.closest('tr');
-    const inputs = row.querySelectorAll('input');
-    const selects = row.querySelectorAll('td select');
+function closeModal() {
+    document.getElementById('addModal').style.display = 'none';
+}
+
+async function saveNewOffice() {
+    const selects = document.querySelectorAll('#addModal select');
     const newOffice = {
-        officeName: inputs[0].value,
-        department: inputs[1].value,
-        contactPerson: inputs[2].value,
-        contactEmail: inputs[3].value,
-        totalEmployees: inputs[4].value,
+        officeName: document.getElementById('new_officeName').value,
+        department: document.getElementById('new_department').value,
+        contactPerson: document.getElementById('new_contactPerson').value,
+        contactEmail: document.getElementById('new_contactEmail').value,
+        totalEmployees: document.getElementById('new_totalEmployees').value,
         pantryStatus: getCategoryData(selects, "pantry"),
         restroomsStatus: getCategoryData(selects, "restrooms"),
         meetingRoomsStatus: getCategoryData(selects, "meetingRooms"),
         eventsStatus: getCategoryData(selects, "events"),
         premisesStatus: getCategoryData(selects, "premises"),
-        certificateDate: inputs[5].value,
-        notes: inputs[6].value
+        certificateDate: document.getElementById('new_certificateDate').value,
+        notes: document.getElementById('new_notes').value
     };
     await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newOffice)
     });
+    closeModal();
     loadOffices();
 }
 
@@ -289,6 +305,5 @@ function exportToJSON() {
 
 window.onload = loadOffices;
 </script>
-
 </body>
 </html>

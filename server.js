@@ -19,57 +19,40 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ MongoDB connected'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
+// Schema
 const officeSchema = new mongoose.Schema({
-  officeName: String,
-  department: String,
-  contactPerson: String,
-  contactEmail: String,
-  totalEmployees: Number,
-  pantry: {
-    platesCutlery: String,
-    waterBottles: String,
-    cupsGlasses: String,
-    foodLeftovers: String,
-    cleaners: String
-  },
-  restrooms: {
-    tissuePapers: String,
-    toiletRolls: String,
-    sanitaryWaste: String,
-    waterSavingDevices: String,
-    cleaners: String
-  },
-  meetingRooms: {
-    cupsGlasses: String,
-    waterBottles: String,
-    printoutsStationery: String,
-    platesCutlery: String,
-    cleaners: String
-  },
-  events: {
-    venueStageDecorations: String,
-    waterBottles: String,
-    displaysBadges: String,
-    foodWaste: String,
-    platesCutlery: String
-  },
-  premises: {
-    eWaste: String,
-    gardenMatter: String,
-    grayWater: String,
-    stormWater: String,
-    foodLeftovers: String
-  },
-  certificateDate: String,
-  notes: String
+    officeName: String,
+    department: String,
+    contactPerson: String,
+    contactEmail: String,
+    totalEmployees: Number,
+    pantry: {
+        items: [String],
+        status: String
+    },
+    restrooms: {
+        items: [String],
+        status: String
+    },
+    meetingRooms: {
+        items: [String],
+        status: String
+    },
+    events: {
+        items: [String],
+        status: String
+    },
+    premises: {
+        items: [String],
+        status: String
+    },
+    certificateDate: String,
+    notes: String
 });
-
 
 const Office = mongoose.model('Office', officeSchema);
 
-// ================= API ROUTES ================= //
-
-// Get all offices
+// Routes
 app.get('/api/offices', async (req, res) => {
     try {
         const offices = await Office.find();
@@ -79,7 +62,6 @@ app.get('/api/offices', async (req, res) => {
     }
 });
 
-// Get single office by ID
 app.get('/api/offices/:id', async (req, res) => {
     try {
         const office = await Office.findById(req.params.id);
@@ -90,7 +72,6 @@ app.get('/api/offices/:id', async (req, res) => {
     }
 });
 
-// Create new office
 app.post('/api/offices', async (req, res) => {
     try {
         const newOffice = new Office(req.body);
@@ -101,7 +82,6 @@ app.post('/api/offices', async (req, res) => {
     }
 });
 
-// Update Office
 app.put('/api/offices/:id', async (req, res) => {
     try {
         const updatedOffice = await Office.findByIdAndUpdate(
@@ -115,7 +95,6 @@ app.put('/api/offices/:id', async (req, res) => {
     }
 });
 
-// Delete office
 app.delete('/api/offices/:id', async (req, res) => {
     try {
         const deleted = await Office.findByIdAndDelete(req.params.id);
@@ -126,12 +105,10 @@ app.delete('/api/offices/:id', async (req, res) => {
     }
 });
 
-// Serve frontend
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
