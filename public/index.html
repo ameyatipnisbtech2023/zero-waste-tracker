@@ -1,61 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Zero Waste Office Tracker</title>
-<style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-    .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    th { background: #4CAF50; color: white; }
-    input, select, textarea, button { padding: 5px; }
-    .btn { padding: 5px 10px; margin: 2px; cursor: pointer; }
-    .export-section { margin-top: 20px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌱 Zero Waste Office Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+        h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
+        th { background: #28a745; color: white; }
+        button { padding: 5px 10px; margin: 2px; cursor: pointer; }
+        .btn { background: #007bff; color: white; border: none; }
+        .btn-danger { background: #dc3545; color: white; border: none; }
+        .btn-save { background: #28a745; color: white; border: none; }
+        .export-section { margin-top: 20px; }
+    </style>
 </head>
 <body>
-<div class="container">
+
     <h1>🌱 Zero Waste Office Tracker</h1>
 
-    <!-- Add Office Form -->
-    <form id="officeForm">
-        <input name="officeName" placeholder="Office Name" required>
-        <input name="department" placeholder="Department">
-        <input name="contactPerson" placeholder="Contact Person" required>
-        <input name="contactEmail" type="email" placeholder="Contact Email">
-        <input name="totalEmployees" type="number" placeholder="Total Employees" min="1">
-        <select name="pantryStatus">
-            <option value="Not Started">Not Started</option>
-            <option value="Planned">Planned</option>
-            <option value="Implemented">Implemented</option>
-        </select>
-        <select name="restroomsStatus">
-            <option value="Not Started">Not Started</option>
-            <option value="Planned">Planned</option>
-            <option value="Implemented">Implemented</option>
-        </select>
-        <select name="meetingRoomsStatus">
-            <option value="Not Started">Not Started</option>
-            <option value="Planned">Planned</option>
-            <option value="Implemented">Implemented</option>
-        </select>
-        <select name="eventsStatus">
-            <option value="Not Started">Not Started</option>
-            <option value="Planned">Planned</option>
-            <option value="Implemented">Implemented</option>
-        </select>
-        <select name="premisesStatus">
-            <option value="Not Started">Not Started</option>
-            <option value="Planned">Planned</option>
-            <option value="Implemented">Implemented</option>
-        </select>
-        <input name="certificateDate" type="date">
-        <textarea name="notes" placeholder="Notes"></textarea>
-        <button type="submit">Add New Office</button>
-    </form>
+    <button class="btn" onclick="addNewRow()">➕ Add New Office</button>
 
-    <!-- Office Table -->
     <table id="officeTable">
         <thead>
             <tr>
@@ -77,144 +44,185 @@
         <tbody></tbody>
     </table>
 
-    <!-- Export Buttons -->
     <div class="export-section">
-        <button onclick="exportCSV()">📊 Export to CSV</button>
-        <button onclick="exportJSON()">💾 Export to JSON</button>
+        <button class="btn" onclick="exportToCSV()">📊 Export to CSV</button>
+        <button class="btn" onclick="exportToJSON()">💾 Export to JSON</button>
     </div>
-</div>
 
-<script>
-const API_URL = '/api/offices';
-let offices = [];
+    <script>
+        const API_URL = '/api/offices';
 
-async function loadOffices() {
-    const res = await fetch(API_URL);
-    offices = await res.json();
-    renderTable();
-}
+        async function loadOffices() {
+            const res = await fetch(API_URL);
+            const offices = await res.json();
+            const tbody = document.querySelector('#officeTable tbody');
+            tbody.innerHTML = '';
+            offices.forEach(office => {
+                const row = document.createElement('tr');
+                row.dataset.id = office._id;
+                row.innerHTML = `
+                    <td>${office.officeName || ''}</td>
+                    <td>${office.department || ''}</td>
+                    <td>${office.contactPerson || ''}</td>
+                    <td>${office.contactEmail || ''}</td>
+                    <td>${office.totalEmployees || ''}</td>
+                    <td>${office.pantryStatus || ''}</td>
+                    <td>${office.restroomsStatus || ''}</td>
+                    <td>${office.meetingRoomsStatus || ''}</td>
+                    <td>${office.eventsStatus || ''}</td>
+                    <td>${office.premisesStatus || ''}</td>
+                    <td>${office.certificateDate || ''}</td>
+                    <td>${office.Notes || ''}</td>
+                    <td>
+                        <button class="btn" onclick="editRow(this)">Edit</button>
+                        <button class="btn-danger" onclick="deleteOffice('${office._id}')">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
 
-function renderTable() {
-    const tbody = document.querySelector('#officeTable tbody');
-    tbody.innerHTML = '';
-    offices.forEach(office => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            ${makeCell(office.officeName)}
-            ${makeCell(office.department)}
-            ${makeCell(office.contactPerson)}
-            ${makeCell(office.contactEmail)}
-            ${makeCell(office.totalEmployees)}
-            ${makeCell(office.pantryStatus)}
-            ${makeCell(office.restroomsStatus)}
-            ${makeCell(office.meetingRoomsStatus)}
-            ${makeCell(office.eventsStatus)}
-            ${makeCell(office.premisesStatus)}
-            ${makeCell(office.certificateDate)}
-            ${makeCell(office.notes)}
-            <td>
-                <button onclick="editRow('${office._id}', this)">Edit</button>
-                <button onclick="deleteOffice('${office._id}')">Delete</button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-}
+        function editRow(button) {
+            const row = button.closest('tr');
+            const cells = row.querySelectorAll('td');
+            for (let i = 0; i < cells.length - 1; i++) {
+                const value = cells[i].innerText;
+                if (i === 10) { // Date field
+                    cells[i].innerHTML = `<input type="date" value="${value}">`;
+                } else {
+                    cells[i].innerHTML = `<input type="text" value="${value}">`;
+                }
+            }
+            button.textContent = 'Save';
+            button.className = 'btn-save';
+            button.onclick = () => saveRow(row);
+        }
 
-function makeCell(content) {
-    return `<td>${content || ''}</td>`;
-}
+        async function saveRow(row) {
+            const id = row.dataset.id;
+            const inputs = row.querySelectorAll('input');
+            const updatedOffice = {
+                officeName: inputs[0].value,
+                department: inputs[1].value,
+                contactPerson: inputs[2].value,
+                contactEmail: inputs[3].value,
+                totalEmployees: inputs[4].value,
+                pantryStatus: inputs[5].value,
+                restroomsStatus: inputs[6].value,
+                meetingRoomsStatus: inputs[7].value,
+                eventsStatus: inputs[8].value,
+                premisesStatus: inputs[9].value,
+                certificateDate: inputs[10].value,
+                Notes: inputs[11].value
+            };
+            await fetch(`${API_URL}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedOffice)
+            });
+            loadOffices();
+        }
 
-function editRow(id, btn) {
-    const row = btn.closest('tr');
-    const office = offices.find(o => o._id === id);
-    row.innerHTML = `
-        ${inputCell('officeName', office.officeName)}
-        ${inputCell('department', office.department)}
-        ${inputCell('contactPerson', office.contactPerson)}
-        ${inputCell('contactEmail', office.contactEmail, 'email')}
-        ${inputCell('totalEmployees', office.totalEmployees, 'number')}
-        ${selectCell('pantryStatus', office.pantryStatus)}
-        ${selectCell('restroomsStatus', office.restroomsStatus)}
-        ${selectCell('meetingRoomsStatus', office.meetingRoomsStatus)}
-        ${selectCell('eventsStatus', office.eventsStatus)}
-        ${selectCell('premisesStatus', office.premisesStatus)}
-        ${inputCell('certificateDate', office.certificateDate, 'date')}
-        ${textareaCell('notes', office.notes)}
-        <td>
-            <button onclick="saveRow('${id}', this)">Save</button>
-            <button onclick="loadOffices()">Cancel</button>
-        </td>
-    `;
-}
+        async function deleteOffice(id) {
+            if (confirm('Are you sure you want to delete this office?')) {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                loadOffices();
+            }
+        }
 
-function inputCell(name, value, type = 'text') {
-    return `<td><input name="${name}" type="${type}" value="${value || ''}"></td>`;
-}
+        function addNewRow() {
+            const tbody = document.querySelector('#officeTable tbody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="date"></td>
+                <td><input type="text"></td>
+                <td><button class="btn-save" onclick="saveNewRow(this)">Save</button></td>
+            `;
+            tbody.appendChild(row);
+        }
 
-function textareaCell(name, value) {
-    return `<td><textarea name="${name}">${value || ''}</textarea></td>`;
-}
+        async function saveNewRow(button) {
+            const row = button.closest('tr');
+            const inputs = row.querySelectorAll('input');
+            const newOffice = {
+                officeName: inputs[0].value,
+                department: inputs[1].value,
+                contactPerson: inputs[2].value,
+                contactEmail: inputs[3].value,
+                totalEmployees: inputs[4].value,
+                pantryStatus: inputs[5].value,
+                restroomsStatus: inputs[6].value,
+                meetingRoomsStatus: inputs[7].value,
+                eventsStatus: inputs[8].value,
+                premisesStatus: inputs[9].value,
+                certificateDate: inputs[10].value,
+                Notes: inputs[11].value
+            };
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newOffice)
+            });
+            loadOffices();
+        }
 
-function selectCell(name, value) {
-    const options = ['Not Started','Planned','Implemented'];
-    return `<td><select name="${name}">${options.map(opt =>
-        `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`).join('')}</select></td>`;
-}
+        function exportToCSV() {
+            fetch(API_URL)
+                .then(res => res.json())
+                .then(data => {
+                    const csvRows = [];
+                    const headers = ["Office Name","Department","Contact Person","Contact Email","Total Employees","Pantry","Restrooms","Meeting Rooms","Events","Premises","Certificate Date","Notes"];
+                    csvRows.push(headers.join(','));
+                    for (const office of data) {
+                        csvRows.push([
+                            office.officeName || '',
+                            office.department || '',
+                            office.contactPerson || '',
+                            office.contactEmail || '',
+                            office.totalEmployees || '',
+                            office.pantryStatus || '',
+                            office.restroomsStatus || '',
+                            office.meetingRoomsStatus || '',
+                            office.eventsStatus || '',
+                            office.premisesStatus || '',
+                            office.certificateDate || '',
+                            office.Notes || ''
+                        ].map(v => `"${v}"`).join(','));
+                    }
+                    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.setAttribute('href', url);
+                    a.setAttribute('download', 'offices.csv');
+                    a.click();
+                });
+        }
 
-async function saveRow(id, btn) {
-    const row = btn.closest('tr');
-    const data = {};
-    row.querySelectorAll('input, select, textarea').forEach(el => data[el.name] = el.value);
-    await fetch(`${API_URL}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    loadOffices();
-}
+        function exportToJSON() {
+            fetch(API_URL)
+                .then(res => res.json())
+                .then(data => {
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.setAttribute('href', url);
+                    a.setAttribute('download', 'offices.json');
+                    a.click();
+                });
+        }
 
-async function deleteOffice(id) {
-    if (confirm('Delete this office?')) {
-        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        loadOffices();
-    }
-}
+        window.onload = loadOffices;
+    </script>
 
-document.querySelector('#officeForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const data = {};
-    e.target.querySelectorAll('input, select, textarea').forEach(el => data[el.name] = el.value);
-    await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    e.target.reset();
-    loadOffices();
-});
-
-function exportCSV() {
-    let csv = Object.keys(offices[0] || {}).filter(k => k !== '_id' && k !== '__v').join(',') + '\n';
-    offices.forEach(o => {
-        csv += Object.keys(o).filter(k => k !== '_id' && k !== '__v').map(k => `"${o[k]||''}"`).join(',') + '\n';
-    });
-    downloadFile(csv, 'offices.csv', 'text/csv');
-}
-
-function exportJSON() {
-    downloadFile(JSON.stringify(offices, null, 2), 'offices.json', 'application/json');
-}
-
-function downloadFile(content, fileName, type) {
-    const blob = new Blob([content], { type });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = fileName; a.click();
-    URL.revokeObjectURL(url);
-}
-
-loadOffices();
-</script>
 </body>
 </html>
