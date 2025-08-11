@@ -19,21 +19,49 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ MongoDB connected'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Office Schema
-// Office Schema
 const officeSchema = new mongoose.Schema({
-    officeName: String,
-    department: String,
-    contactPerson: String,
-    contactEmail: String,
-    totalEmployees: Number,
-    pantryStatus: String,
-    restroomsStatus: String,
-    meetingRoomsStatus: String,
-    eventsStatus: String,
-    premisesStatus: String,
-    certificateDate: String,
-    Notes: String
+  officeName: String,
+  department: String,
+  contactPerson: String,
+  contactEmail: String,
+  totalEmployees: Number,
+  pantry: {
+    platesCutlery: String,
+    waterBottles: String,
+    cupsGlasses: String,
+    foodLeftovers: String,
+    cleaners: String
+  },
+  restrooms: {
+    tissuePapers: String,
+    toiletRolls: String,
+    sanitaryWaste: String,
+    waterSavingDevices: String,
+    cleaners: String
+  },
+  meetingRooms: {
+    cupsGlasses: String,
+    waterBottles: String,
+    printoutsStationery: String,
+    platesCutlery: String,
+    cleaners: String
+  },
+  events: {
+    venueStageDecorations: String,
+    waterBottles: String,
+    displaysBadges: String,
+    foodWaste: String,
+    platesCutlery: String
+  },
+  premises: {
+    eWaste: String,
+    gardenMatter: String,
+    grayWater: String,
+    stormWater: String,
+    foodLeftovers: String
+  },
+  certificateDate: String,
+  notes: String
 });
 
 
@@ -86,7 +114,6 @@ app.put('/api/offices/:id', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
 
 // Delete office
 app.delete('/api/offices/:id', async (req, res) => {
