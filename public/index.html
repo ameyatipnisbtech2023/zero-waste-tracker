@@ -27,6 +27,26 @@
 
 <h1>🌱 Zero Waste Office Tracker</h1>
 
+<!-- Stats Visualization -->
+<div id="statsContainer" style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
+  <div style="flex:1; text-align:center; background:#f8f9fa; padding:20px; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+    <div id="totalOffices" style="font-size:2em; color:green;">0</div>
+    <div>Total Offices</div>
+  </div>
+  <div style="flex:1; text-align:center; background:#f8f9fa; padding:20px; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+    <div id="fullyImplemented" style="font-size:2em; color:green;">0</div>
+    <div>Fully Implemented</div>
+  </div>
+  <div style="flex:1; text-align:center; background:#f8f9fa; padding:20px; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+    <div id="inProgress" style="font-size:2em; color:green;">0</div>
+    <div>In Progress</div>
+  </div>
+  <div style="flex:1; text-align:center; background:#f8f9fa; padding:20px; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+    <div id="averageProgress" style="font-size:2em; color:green;">0%</div>
+    <div>Average Progress</div>
+  </div>
+</div>
+
 <button class="btn" onclick="openModal()">➕ Add New Office</button>
 
 <div id="officeModal" class="modal">
@@ -131,10 +151,43 @@ function renderGroupedDisplay(obj) {
     return html;
 }
 
-/* Load offices */
+/* Update Stats Visualization */
+function updateStats(offices) {
+    const totalOffices = offices.length;
+    let fullyImplementedCount = 0;
+    let totalImplemented = 0;
+    const totalStatuses = totalOffices * 25; // 25 sub-categories per office
+
+    offices.forEach(o => {
+        const allStatuses = [
+            ...Object.values(o.pantryStatus || {}),
+            ...Object.values(o.restroomsStatus || {}),
+            ...Object.values(o.meetingRoomsStatus || {}),
+            ...Object.values(o.eventsStatus || {}),
+            ...Object.values(o.premisesStatus || {})
+        ];
+        const implementedCount = allStatuses.filter(s => s === "Implemented").length;
+        totalImplemented += implementedCount;
+        if (implementedCount === 25) {
+            fullyImplementedCount++;
+        }
+    });
+
+    document.getElementById("totalOffices").innerText = totalOffices;
+    document.getElementById("fullyImplemented").innerText = fullyImplementedCount;
+    document.getElementById("inProgress").innerText = totalOffices - fullyImplementedCount;
+    document.getElementById("averageProgress").innerText =
+        totalStatuses > 0 ? Math.round((totalImplemented / totalStatuses) * 100) + "%" : "0%";
+}
+
+/* Modify loadOffices to also refresh stats */
 async function loadOffices() {
     const res = await fetch(API_URL);
     const offices = await res.json();
+
+    // Update stats here
+    updateStats(offices);
+
     const tbody = document.querySelector('#officeTable tbody');
     tbody.innerHTML = '';
     offices.forEach(o => {
@@ -166,6 +219,7 @@ async function loadOffices() {
         tbody.appendChild(row);
     });
 }
+
 
 /* Collect form data */
 function collectFormData(container) {
