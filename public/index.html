@@ -25,6 +25,29 @@
         font-size: 1.2em; 
         font-weight: bold; 
     }
+    .bar-container {
+        position: relative;
+        background-color: #f0f0f0;
+        height: 20px;
+        border-radius: 4px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+    }
+
+    .bar-fill {
+        height: 100%;
+        transition: width 0.4s ease;
+    }
+
+    .bar-text {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        font-size: 12px;
+        font-weight: bold;
+        color: #000;
+    }
 </style>
 </head>
 <body>
@@ -200,7 +223,19 @@ async function loadOffices() {
     offices.forEach(o => {
         const getCategoryScore = (statusMap) => {
             const implementedCount = Object.values(statusMap || {}).filter(s => s === "Implemented").length;
-            return `${implementedCount} / 5`; // Each category out of 5
+            const percentage = (implementedCount / 5) * 100;
+
+            let color = "#ff4d4d"; // red
+            if (percentage >= 75) color = "#4CAF50"; // green
+            else if (percentage >= 50) color = "#FFB300"; // orange
+            else if (percentage >= 25) color = "#FF7043"; // light orange
+
+            return `
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: ${percentage}%; background-color: ${color};"></div>
+                    <span class="bar-text">${implementedCount} / 5</span>
+                </div>
+            `;
         };
 
         const getCompletionPercent = (office) => {
