@@ -77,7 +77,7 @@
 <tr>
     <th>Office Name</th><th>Department</th><th>Contact Person</th><th>Contact Email</th><th>Total Employees</th>
     <th>Pantry</th><th>Restrooms</th><th>Meeting Rooms</th><th>Events</th><th>Premises</th>
-    <th>Certificate Date</th><th>Notes</th><th>Actions</th>
+    <th>Certificate Date</th><th>Notes</th><th>Completion (%)</th><th>Actions</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -193,6 +193,16 @@ async function loadOffices() {
     const tbody = document.querySelector('#officeTable tbody');
     tbody.innerHTML = '';
     offices.forEach(o => {
+        const allStatuses = [
+            ...Object.values(o.pantryStatus || {}),
+            ...Object.values(o.restroomsStatus || {}),
+            ...Object.values(o.meetingRoomsStatus || {}),
+            ...Object.values(o.eventsStatus || {}),
+            ...Object.values(o.premisesStatus || {})
+        ];
+        const implementedCount = allStatuses.filter(s => s === "Implemented").length;
+        const completionPercent = ((implementedCount / 25) * 100).toFixed(0) + "%";
+
         const row = document.createElement('tr');
         row.dataset.id = o._id;
         row.dataset.pantry = JSON.stringify(o.pantryStatus || {});
@@ -213,6 +223,7 @@ async function loadOffices() {
             <td>${renderGroupedDisplay(o.premisesStatus)}</td>
             <td>${o.certificateDate||''}</td>
             <td>${o.notes||''}</td>
+            <td>${completionPercent}</td>
             <td>
                 <button class="btn" onclick="editRow(this)">Edit</button>
                 <button class="btn-danger" onclick="deleteOffice('${o._id}')">Delete</button>
