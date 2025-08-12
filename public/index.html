@@ -240,8 +240,9 @@ async function loadOffices() {
             <td>${getCategoryScore(o.meetingRoomsStatus)}</td>
             <td>${getCategoryScore(o.eventsStatus)}</td>
             <td>${getCategoryScore(o.premisesStatus)}</td>
-            <td class="completion-cell">${completionPercent}</td>
+            <td>${o.certificateDate || ''}</td> <!-- Restored -->
             <td>${o.notes || ''}</td>
+            <td class="completion-cell">${completionPercent}</td> <!-- Placed after Notes -->
             <td>
                 <button class="btn" onclick="editRow(this)">Edit</button>
                 <button class="btn-danger" onclick="deleteOffice('${o._id}')">Delete</button>
