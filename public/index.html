@@ -140,14 +140,16 @@ function createGroupedDropdowns(categoryName, data = {}, useName = false) {
 function renderGroupedDisplay(obj) {
     if (!obj) return "";
     let implementedCount = 0;
-    const total = Object.keys(categoryOptions[Object.keys(categoryOptions).find(cat => Object.keys(obj).includes(categoryOptions[cat][0]))] || {}).length || 5;
-
     let html = Object.entries(obj).map(([sub, status]) => {
         if (status === "Implemented") implementedCount++;
-        return `<div><b>${sub}:</b> ${status}</div>`;
+        return `<div style="border-bottom: 1px solid #ddd; padding: 2px 0;">
+                    <b>${sub}:</b> ${status}
+                </div>`;
     }).join("");
 
-    html += `<div><b>Score:</b> ${implementedCount}/${total}</div>`;
+    html += `<div style="border-top: 2px solid #aaa; margin-top: 5px; padding-top: 3px;">
+                <b>Score:</b> ${implementedCount}/25
+             </div>`;
     return html;
 }
 
