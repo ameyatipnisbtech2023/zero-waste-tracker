@@ -21,6 +21,10 @@
              background-color: rgba(0,0,0,0.4); }
     .modal-content { background: #fff; margin: 5% auto; padding: 20px; width: 80%; border-radius: 8px; }
     .close { float: right; font-size: 28px; cursor: pointer; }
+    .completion-cell {
+        font-size: 1.2em; 
+        font-weight: bold; 
+    }
 </style>
 </head>
 <body>
@@ -223,7 +227,7 @@ async function loadOffices() {
             <td>${renderGroupedDisplay(o.premisesStatus)}</td>
             <td>${o.certificateDate||''}</td>
             <td>${o.notes||''}</td>
-            <td>${completionPercent}</td>
+            <td class="completion-cell">${completionPercent}</td>
             <td>
                 <button class="btn" onclick="editRow(this)">Edit</button>
                 <button class="btn-danger" onclick="deleteOffice('${o._id}')">Delete</button>
