@@ -7,8 +7,30 @@
 <style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
     h1 { text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-    th, td { padding: 8px; border: 1px solid #ccc; text-align: left; vertical-align: top; }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: white;
+        table-layout: fixed; /* ensures equal column sizing */
+    }
+
+    th, td {
+        padding: 8px;
+        border: 1px solid #ccc;
+        text-align: left;
+        vertical-align: top;
+        word-wrap: break-word; /* ensures long text wraps */
+    }
+
+    /* Force equal widths for the 5 category columns */
+    th:nth-child(6), td:nth-child(6),
+    th:nth-child(7), td:nth-child(7),
+    th:nth-child(8), td:nth-child(8),
+    th:nth-child(9), td:nth-child(9),
+    th:nth-child(10), td:nth-child(10) {
+        width: 12%; /* adjust percentage so 5 of them fit evenly */
+    }
     th { background: #28a745; color: white; }
     button { padding: 5px 10px; margin: 2px; cursor: pointer; }
     .btn { background: #007bff; color: white; border: none; }
