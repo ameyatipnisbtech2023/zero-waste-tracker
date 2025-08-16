@@ -58,7 +58,7 @@ function computeCompletionAndCertification(body) {
 
     const percent = Math.round((implemented / 25) * 100);
 
-    // Color-coded + medal logic
+    // Certification status logic
     let status = `<span style="color:#999;">Not Certified</span>`;
     if (percent >= 90) status = `<span style="color:darkslategray;">🔘 Platinum</span>`;
     else if (percent >= 80) status = `<span style="color:gold;">🥇 Gold</span>`;
