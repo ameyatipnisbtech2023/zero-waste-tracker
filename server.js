@@ -19,17 +19,6 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ MongoDB connected'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Helper function to compute Certification Status
-function getCertificationStatus(percent) {
-    const p = parseInt(percent);
-    if (p >= 90) return "Platinum";
-    if (p >= 80) return "Gold";
-    if (p >= 70) return "Silver";
-    if (p >= 60) return "Bronze";
-    if (p >= 50) return "Certified";
-    return "Not Certified";
-}
-
 const officeSchema = new mongoose.Schema({
     officeName: String,
     department: String,
@@ -51,23 +40,6 @@ const officeSchema = new mongoose.Schema({
 
 const Office = mongoose.model('Office', officeSchema);
 
-// Utility to calculate completion % and certification status
-function computeCompletion(data) {
-    const allStatuses = [
-        ...Object.values(data.pantryStatus || {}),
-        ...Object.values(data.restroomsStatus || {}),
-        ...Object.values(data.meetingRoomsStatus || {}),
-        ...Object.values(data.eventsStatus || {}),
-        ...Object.values(data.premisesStatus || {})
-    ];
-    const implementedCount = allStatuses.filter(s => s === "Implemented").length;
-    const percent = ((implementedCount / 25) * 100).toFixed(0);
-    return {
-        completionPercent: Number(percent),
-        certificationStatus: getCertificationStatus(percent)
-    };
-}
-
 function computeCompletionAndCertification(body) {
     const categories = [
         body.pantryStatus,
@@ -86,12 +58,13 @@ function computeCompletionAndCertification(body) {
 
     const percent = Math.round((implemented / 25) * 100);
 
-    let status = "Not Certified";
-    if (percent >= 90) status = "Platinum";
-    else if (percent >= 80) status = "Gold";
-    else if (percent >= 70) status = "Silver";
-    else if (percent >= 60) status = "Bronze";
-    else if (percent >= 50) status = "Certified";
+    // Color-coded + medal logic
+    let status = `<span style="color:#999;">Not Certified</span>`;
+    if (percent >= 90) status = `<span style="color:darkslategray;">🏅 Platinum</span>`;
+    else if (percent >= 80) status = `<span style="color:gold;">🥇 Gold</span>`;
+    else if (percent >= 70) status = `<span style="color:silver;">🥈 Silver</span>`;
+    else if (percent >= 60) status = `<span style="color:#cd7f32;">🥉 Bronze</span>`;
+    else if (percent >= 50) status = `<span style="color:#8a8a8a;">Certified</span>`;
 
     return { percent, status };
 }
