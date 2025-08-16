@@ -232,19 +232,14 @@ function updateStats(offices) {
 }
 
 function getCertificationStatus(percent) {
-    let num = parseInt(percent.replace("%", "")) || 0;
-    let status = "Not Certified";
-    let color = "black";
-
-    if (num >= 90) { status = "Platinum"; color = "darkslategray"; }
-    else if (num >= 80) { status = "Gold"; color = "gold"; }
-    else if (num >= 70) { status = "Silver"; color = "silver"; }
-    else if (num >= 60) { status = "Bronze"; color = "saddlebrown"; }
-    else if (num >= 50) { status = "Certified"; color = "gray"; }
-
-    return `<span style="color:${color}; font-weight:bold;">${status}</span>`;
+    const p = parseInt(percent);
+    if (p >= 90) return `<span style="color:darkslategray;">🏅 Platinum</span>`;
+    if (p >= 80) return `<span style="color:gold;">🥇 Gold</span>`;
+    if (p >= 70) return `<span style="color:silver;">🥈 Silver</span>`;
+    if (p >= 60) return `<span style="color:#cd7f32;">🥉 Bronze</span>`;
+    if (p >= 50) return `<span style="color:#8a8a8a;">🔘 Certified</span>`;
+    return `<span style="color:#999;">Not Certified</span>`;
 }
-
 
 /* Modify loadOffices to also refresh stats */
 async function loadOffices() {
@@ -313,8 +308,8 @@ async function loadOffices() {
             <td>${getCategoryScore(o.eventsStatus)}</td>
             <td>${getCategoryScore(o.premisesStatus)}</td>
             <td>${o.certificateDate || ''}</td> <!-- Restored -->
-            <td class="completion-cell">${completionPercent}</td>
             <td>${getCertificationStatus(completionPercent)}</td>
+            <td class="completion-cell">${completionPercent}</td>
             <td>
                 <button class="btn" onclick="editRow(this)">Edit</button>
                 <button class="btn-danger" onclick="deleteOffice('${o._id}')">Delete</button>
