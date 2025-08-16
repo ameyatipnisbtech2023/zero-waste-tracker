@@ -231,16 +231,6 @@ function updateStats(offices) {
         totalStatuses > 0 ? Math.round((totalImplemented / totalStatuses) * 100) + "%" : "0%";
 }
 
-function getCertificationStatus(percent) {
-    const p = parseInt(percent);
-    if (p >= 90) return `<span style="color:darkslategray;">🔘 Platinum</span>`; 
-    if (p >= 80) return `<span style="color:gold;">🥇 Gold</span>`;
-    if (p >= 70) return `<span style="color:silver;">🥈 Silver</span>`;
-    if (p >= 60) return `<span style="color:#cd7f32;">🥉 Bronze</span>`;
-    if (p >= 50) return `<span style="color:#8a8a8a;">Certified</span>`; 
-    return `<span style="color:#999;">Not Certified</span>`;
-}
-
 /* Modify loadOffices to also refresh stats */
 async function loadOffices() {
     const res = await fetch(API_URL);
