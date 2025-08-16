@@ -30,7 +30,6 @@ function getCertificationStatus(percent) {
     return "Not Certified";
 }
 
-// Updated Schema - remove notes, add completionPercent + certificationStatus
 const officeSchema = new mongoose.Schema({
     officeName: String,
     department: String,
@@ -45,8 +44,9 @@ const officeSchema = new mongoose.Schema({
     premisesStatus: { type: Map, of: String },
 
     certificateDate: String,
-    completionPercent: Number,        // ✅ new
-    certificationStatus: String       // ✅ new
+
+    completionPercent: { type: Number, default: 0 },
+    certificationStatus: { type: String, default: "Not Certified" }
 });
 
 const Office = mongoose.model('Office', officeSchema);
@@ -66,6 +66,34 @@ function computeCompletion(data) {
         completionPercent: Number(percent),
         certificationStatus: getCertificationStatus(percent)
     };
+}
+
+function computeCompletionAndCertification(body) {
+    const categories = [
+        body.pantryStatus,
+        body.restroomsStatus,
+        body.meetingRoomsStatus,
+        body.eventsStatus,
+        body.premisesStatus
+    ];
+
+    let implemented = 0;
+    categories.forEach(cat => {
+        if (cat) {
+            implemented += Object.values(cat).filter(s => s === "Implemented").length;
+        }
+    });
+
+    const percent = Math.round((implemented / 25) * 100);
+
+    let status = "Not Certified";
+    if (percent >= 90) status = "Platinum";
+    else if (percent >= 80) status = "Gold";
+    else if (percent >= 70) status = "Silver";
+    else if (percent >= 60) status = "Bronze";
+    else if (percent >= 50) status = "Certified";
+
+    return { percent, status };
 }
 
 // Routes
@@ -90,12 +118,11 @@ app.get('/api/offices/:id', async (req, res) => {
 
 app.post('/api/offices', async (req, res) => {
     try {
-        const { completionPercent, certificationStatus } = computeCompletion(req.body);
-        const newOffice = new Office({
-            ...req.body,
-            completionPercent,
-            certificationStatus
-        });
+        const { percent, status } = computeCompletionAndCertification(req.body);
+        req.body.completionPercent = percent;
+        req.body.certificationStatus = status;
+
+        const newOffice = new Office(req.body);
         await newOffice.save();
         res.json(newOffice);
     } catch (err) {
@@ -105,10 +132,13 @@ app.post('/api/offices', async (req, res) => {
 
 app.put('/api/offices/:id', async (req, res) => {
     try {
-        const { completionPercent, certificationStatus } = computeCompletion(req.body);
+        const { percent, status } = computeCompletionAndCertification(req.body);
+        req.body.completionPercent = percent;
+        req.body.certificationStatus = status;
+
         const updatedOffice = await Office.findByIdAndUpdate(
             req.params.id,
-            { ...req.body, completionPercent, certificationStatus },
+            req.body,
             { new: true }
         );
         res.json(updatedOffice);

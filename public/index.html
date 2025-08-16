@@ -308,8 +308,8 @@ async function loadOffices() {
             <td>${getCategoryScore(o.eventsStatus)}</td>
             <td>${getCategoryScore(o.premisesStatus)}</td>
             <td>${o.certificateDate || ''}</td>
-            <td>${o.certificationStatus || ''}</td>   <!-- ✅ backend-driven -->
-            <td class="completion-cell">${o.completionPercent || '0%'}</td> <!-- ✅ backend-driven -->
+            <td>${o.certificationStatus || 'Not Certified'}</td>
+            <td class="completion-cell">${o.completionPercent || 0}%</td>
             <td>
                 <button class="btn" onclick="editRow(this)">Edit</button>
                 <button class="btn-danger" onclick="deleteOffice('${o._id}')">Delete</button>
