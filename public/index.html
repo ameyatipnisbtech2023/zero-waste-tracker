@@ -29,7 +29,7 @@
     th:nth-child(8), td:nth-child(8),
     th:nth-child(9), td:nth-child(9),
     th:nth-child(10), td:nth-child(10) {
-        width: 120px; /* adjust percentage so 5 of them fit evenly */
+        width: 100px; /* adjust percentage so 5 of them fit evenly */
     }
     th { background: #28a745; color: white; }
     button { padding: 5px 10px; margin: 2px; cursor: pointer; }
@@ -126,7 +126,7 @@
 <tr>
     <th>Office Name</th><th>Department</th><th>Contact Person</th><th>Contact Email</th><th>Total Employees</th>
     <th>Pantry</th><th>Restrooms</th><th>Meeting Rooms</th><th>Events</th><th>Premises</th>
-    <th>Certificate Date</th><th>Notes</th><th>Completion (%)</th><th>Actions</th>
+    <th>Certificate Date</th><th>Certification Status</th><th>Completion (%)</th><th>Actions</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -231,6 +231,21 @@ function updateStats(offices) {
         totalStatuses > 0 ? Math.round((totalImplemented / totalStatuses) * 100) + "%" : "0%";
 }
 
+function getCertificationStatus(percent) {
+    let num = parseInt(percent.replace("%", "")) || 0;
+    let status = "Not Certified";
+    let color = "black";
+
+    if (num >= 90) { status = "Platinum"; color = "darkslategray"; }
+    else if (num >= 80) { status = "Gold"; color = "gold"; }
+    else if (num >= 70) { status = "Silver"; color = "silver"; }
+    else if (num >= 60) { status = "Bronze"; color = "saddlebrown"; }
+    else if (num >= 50) { status = "Certified"; color = "gray"; }
+
+    return `<span style="color:${color}; font-weight:bold;">${status}</span>`;
+}
+
+
 /* Modify loadOffices to also refresh stats */
 async function loadOffices() {
     const res = await fetch(API_URL);
@@ -298,8 +313,8 @@ async function loadOffices() {
             <td>${getCategoryScore(o.eventsStatus)}</td>
             <td>${getCategoryScore(o.premisesStatus)}</td>
             <td>${o.certificateDate || ''}</td> <!-- Restored -->
-            <td>${o.notes || ''}</td>
-            <td class="completion-cell">${completionPercent}</td> <!-- Placed after Notes -->
+            <td class="completion-cell">${completionPercent}</td>
+            <td>${getCertificationStatus(completionPercent)}</td>
             <td>
                 <button class="btn" onclick="editRow(this)">Edit</button>
                 <button class="btn-danger" onclick="deleteOffice('${o._id}')">Delete</button>
