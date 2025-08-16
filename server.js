@@ -60,7 +60,7 @@ function computeCompletionAndCertification(body) {
 
     // Color-coded + medal logic
     let status = `<span style="color:#999;">Not Certified</span>`;
-    if (percent >= 90) status = `<span style="color:darkslategray;">🏅 Platinum</span>`;
+    if (percent >= 90) status = `<span style="color:darkslategray;">🔘 Platinum</span>`;
     else if (percent >= 80) status = `<span style="color:gold;">🥇 Gold</span>`;
     else if (percent >= 70) status = `<span style="color:silver;">🥈 Silver</span>`;
     else if (percent >= 60) status = `<span style="color:#cd7f32;">🥉 Bronze</span>`;
