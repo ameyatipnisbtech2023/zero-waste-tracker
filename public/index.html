@@ -307,15 +307,14 @@ async function loadOffices() {
             <td>${getCategoryScore(o.meetingRoomsStatus)}</td>
             <td>${getCategoryScore(o.eventsStatus)}</td>
             <td>${getCategoryScore(o.premisesStatus)}</td>
-            <td>${o.certificateDate || ''}</td> <!-- Restored -->
-            <td>${getCertificationStatus(completionPercent)}</td>
-            <td class="completion-cell">${completionPercent}</td>
+            <td>${o.certificateDate || ''}</td>
+            <td>${o.certificationStatus || ''}</td>   <!-- ✅ backend-driven -->
+            <td class="completion-cell">${o.completionPercent || '0%'}</td> <!-- ✅ backend-driven -->
             <td>
                 <button class="btn" onclick="editRow(this)">Edit</button>
                 <button class="btn-danger" onclick="deleteOffice('${o._id}')">Delete</button>
             </td>
         `;
-
         tbody.appendChild(row);
     });
 }
@@ -409,23 +408,64 @@ async function deleteOffice(id) {
 function exportToCSV() {
     fetch(API_URL).then(res => res.json()).then(data => {
         const headers = ["Office Name","Department","Contact Person","Contact Email","Total Employees"];
-        Object.keys(categoryOptions).forEach(cat => categoryOptions[cat].forEach(sub => headers.push(`${cat}_${sub}`)));
-        headers.push("Certificate Date","Notes");
+        Object.keys(categoryOptions).forEach(cat => 
+            categoryOptions[cat].forEach(sub => headers.push(`${cat}_${sub}`))
+        );
+        headers.push("Certificate Date","Completion (%)","Certification Status");  // ✅ updated
         const csvRows = [headers.join(',')];
+
         data.forEach(o => {
-            let row = [o.officeName||'', o.department||'', o.contactPerson||'', o.contactEmail||'', o.totalEmployees||''];
-            Object.keys(categoryOptions).forEach(cat => categoryOptions[cat].forEach(sub => row.push((o[cat+"Status"] && o[cat+"Status"][sub]) || '')));
-            row.push(o.certificateDate||'', o.notes||'');
+            let row = [
+                o.officeName||'', 
+                o.department||'', 
+                o.contactPerson||'', 
+                o.contactEmail||'', 
+                o.totalEmployees||''
+            ];
+            Object.keys(categoryOptions).forEach(cat => 
+                categoryOptions[cat].forEach(sub => 
+                    row.push((o[cat+"Status"] && o[cat+"Status"][sub]) || '')
+                )
+            );
+            row.push(
+                o.certificateDate||'', 
+                o.completionPercent||'',       
+                o.certificationStatus||''       
+            );
             csvRows.push(row.map(v => `"${v}"`).join(','));
         });
+
         const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'offices.csv'; a.click();
+        const a = document.createElement('a'); 
+        a.href = URL.createObjectURL(blob); 
+        a.download = 'offices.csv'; 
+        a.click();
     });
 }
+
 function exportToJSON() {
     fetch(API_URL).then(res => res.json()).then(data => {
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'offices.json'; a.click();
+        const cleaned = data.map(o => ({
+            officeName: o.officeName || '',
+            department: o.department || '',
+            contactPerson: o.contactPerson || '',
+            contactEmail: o.contactEmail || '',
+            totalEmployees: o.totalEmployees || '',
+            pantryStatus: o.pantryStatus || {},
+            restroomsStatus: o.restroomsStatus || {},
+            meetingRoomsStatus: o.meetingRoomsStatus || {},
+            eventsStatus: o.eventsStatus || {},
+            premisesStatus: o.premisesStatus || {},
+            certificateDate: o.certificateDate || '',
+            completionPercent: o.completionPercent || '',   
+            certificationStatus: o.certificationStatus || '' 
+        }));
+
+        const blob = new Blob([JSON.stringify(cleaned, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); 
+        a.href = URL.createObjectURL(blob); 
+        a.download = 'offices.json'; 
+        a.click();
     });
 }
 

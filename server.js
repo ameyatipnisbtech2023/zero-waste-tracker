@@ -19,7 +19,18 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ MongoDB connected'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Updated Schema - store statuses as key:value maps
+// Helper function to compute Certification Status
+function getCertificationStatus(percent) {
+    const p = parseInt(percent);
+    if (p >= 90) return "Platinum";
+    if (p >= 80) return "Gold";
+    if (p >= 70) return "Silver";
+    if (p >= 60) return "Bronze";
+    if (p >= 50) return "Certified";
+    return "Not Certified";
+}
+
+// Updated Schema - remove notes, add completionPercent + certificationStatus
 const officeSchema = new mongoose.Schema({
     officeName: String,
     department: String,
@@ -34,10 +45,28 @@ const officeSchema = new mongoose.Schema({
     premisesStatus: { type: Map, of: String },
 
     certificateDate: String,
-    notes: String
+    completionPercent: Number,        // ✅ new
+    certificationStatus: String       // ✅ new
 });
 
 const Office = mongoose.model('Office', officeSchema);
+
+// Utility to calculate completion % and certification status
+function computeCompletion(data) {
+    const allStatuses = [
+        ...Object.values(data.pantryStatus || {}),
+        ...Object.values(data.restroomsStatus || {}),
+        ...Object.values(data.meetingRoomsStatus || {}),
+        ...Object.values(data.eventsStatus || {}),
+        ...Object.values(data.premisesStatus || {})
+    ];
+    const implementedCount = allStatuses.filter(s => s === "Implemented").length;
+    const percent = ((implementedCount / 25) * 100).toFixed(0);
+    return {
+        completionPercent: Number(percent),
+        certificationStatus: getCertificationStatus(percent)
+    };
+}
 
 // Routes
 app.get('/api/offices', async (req, res) => {
@@ -61,7 +90,12 @@ app.get('/api/offices/:id', async (req, res) => {
 
 app.post('/api/offices', async (req, res) => {
     try {
-        const newOffice = new Office(req.body);
+        const { completionPercent, certificationStatus } = computeCompletion(req.body);
+        const newOffice = new Office({
+            ...req.body,
+            completionPercent,
+            certificationStatus
+        });
         await newOffice.save();
         res.json(newOffice);
     } catch (err) {
@@ -71,9 +105,10 @@ app.post('/api/offices', async (req, res) => {
 
 app.put('/api/offices/:id', async (req, res) => {
     try {
+        const { completionPercent, certificationStatus } = computeCompletion(req.body);
         const updatedOffice = await Office.findByIdAndUpdate(
             req.params.id,
-            req.body,
+            { ...req.body, completionPercent, certificationStatus },
             { new: true }
         );
         res.json(updatedOffice);
