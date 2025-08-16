@@ -114,7 +114,6 @@
       <h3>Events</h3><div id="eventsInputs"></div>
       <h3>Premises</h3><div id="premisesInputs"></div>
       <label>Certificate Date</label><input type="date" name="certificateDate">
-      <label>Notes</label><input type="text" name="notes">
       <br><br>
       <button type="button" class="btn-save" onclick="saveNewOffice()">Save Office</button>
     </form>
@@ -356,7 +355,6 @@ function editRow(button) {
             });
 
             cells[10].innerHTML = `<input name="certificateDate" type="date" value="${office.certificateDate || ''}">`;
-            cells[11].innerHTML = `<input name="notes" value="${office.notes || ''}">`;
 
             button.textContent = 'Save';
             button.className = 'btn-save';
