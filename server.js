@@ -64,7 +64,7 @@ function computeCompletionAndCertification(body) {
     else if (percent >= 80) status = `<span style="color:gold;">🥇 Gold</span>`;
     else if (percent >= 70) status = `<span style="color:silver;">🥈 Silver</span>`;
     else if (percent >= 60) status = `<span style="color:#cd7f32;">🥉 Bronze</span>`;
-    else if (percent >= 50) status = `<span style="color:#8a8a8a;">Certified</span>`;
+    else if (percent >= 50) status = `<span style="color:green;">🔘 Certified</span>`;
 
     return { percent, status };
 }
