@@ -111,8 +111,6 @@
     }
     .bar-fill {
         height: 100%;
-        border-radius: 10px;
-        background: linear-gradient(90deg, #28a745, #218838);
         transition: width 0.4s ease;
     }
     .bar-text {
@@ -135,13 +133,13 @@
         backdrop-filter: blur(3px);
     }
     .modal-content {
-        background: white;
+        background: #fff;
         margin: 5% auto;
         padding: 20px;
         width: 80%;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        animation: zoomIn 0.3s ease;
+        max-height: 80vh;      
+        overflow-y: auto;      
+        border-radius: 8px;
     }
     @keyframes zoomIn {
         from { transform: scale(0.8); opacity: 0; }
