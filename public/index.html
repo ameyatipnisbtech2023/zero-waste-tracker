@@ -267,9 +267,11 @@ function renderGroupedDisplay(statusMap) {
     const percent = (implementedCount / total) * 100;
 
     let color;
-    if (percent <= 20) color = '#dc3545'; // red
-    else if (percent <= 60) color = '#ffc107'; // yellow/orange
-    else color = '#28a745'; // green
+    if (percent <= 20) color = '#dc3545';//red  
+    else if (percent <= 40) color = '#ff7043';//orange  
+    else if (percent <= 60) color = '#ffc107';//yellow  
+    else if (percent <= 80) color = '#8bc34a';//light green  
+    else color = '#28a745';//green
 
     return `
         <div class="bar-container">
