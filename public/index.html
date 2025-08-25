@@ -152,7 +152,7 @@
 </head>
 <body>
 
-<h1>🌱 Zero Waste Office Tracker</h1>
+<h1> Zero Waste Office Tracker</h1>
 
 <!-- Stats Visualization -->
 <div id="statsContainer" style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
@@ -263,20 +263,22 @@ function createGroupedDropdowns(categoryName, data = {}, useName = false) {
     return html;
 }
 
-function renderGroupedDisplay(obj) {
-    if (!obj) return "";
-    let implementedCount = 0;
-    let html = Object.entries(obj).map(([sub, status]) => {
-        if (status === "Implemented") implementedCount++;
-        return `<div style="border-bottom: 1px solid #ddd; padding: 2px 0;">
-                    <b>${sub}:</b> ${status}
-                </div>`;
-    }).join("");
+function renderGroupedDisplay(statusMap) {
+    const total = 5;
+    const implementedCount = Object.values(statusMap || {}).filter(s => s === "Implemented").length;
+    const percent = (implementedCount / total) * 100;
 
-    html += `<div style="border-top: 2px solid #aaa; margin-top: 5px; padding-top: 3px;">
-                <b>Score:</b> ${implementedCount}/25
-             </div>`;
-    return html;
+    let color;
+    if (percent <= 20) color = '#dc3545'; // red
+    else if (percent <= 60) color = '#ffc107'; // yellow/orange
+    else color = '#28a745'; // green
+
+    return `
+        <div class="bar-container">
+            <div class="bar-fill" style="width: ${percent}%; background-color: ${color};"></div>
+            <span class="bar-text">${implementedCount} / ${total}</span>
+        </div>
+    `;
 }
 
 /* Update Stats Visualization */
