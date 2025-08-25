@@ -310,7 +310,6 @@ function updateStats(offices) {
         totalStatuses > 0 ? Math.round((totalImplemented / totalStatuses) * 100) + "%" : "0%";
 }
 
-/* Modify loadOffices to also refresh stats */
 async function loadOffices() {
     const res = await fetch(API_URL);
     const offices = await res.json();
@@ -322,23 +321,6 @@ async function loadOffices() {
     tbody.innerHTML = '';
 
     offices.forEach(o => {
-        const getCategoryScore = (statusMap) => {
-            const implementedCount = Object.values(statusMap || {}).filter(s => s === "Implemented").length;
-            const percentage = (implementedCount / 5) * 100;
-
-            let color = "#ff4d4d"; // red
-            if (percentage >= 75) color = "#4CAF50"; // green
-            else if (percentage >= 50) color = "#FFB300"; // orange
-            else if (percentage >= 25) color = "#FF7043"; // light orange
-
-            return `
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: ${percentage}%; background-color: ${color};"></div>
-                    <span class="bar-text">${implementedCount} / 5</span>
-                </div>
-            `;
-        };
-
         const getCompletionPercent = (office) => {
             let totalImplemented = 0;
             const categories = [
@@ -371,14 +353,14 @@ async function loadOffices() {
             <td>${o.contactPerson || ''}</td>
             <td>${o.contactEmail || ''}</td>
             <td>${o.totalEmployees || ''}</td>
-            <td>${getCategoryScore(o.pantryStatus)}</td>
-            <td>${getCategoryScore(o.restroomsStatus)}</td>
-            <td>${getCategoryScore(o.meetingRoomsStatus)}</td>
-            <td>${getCategoryScore(o.eventsStatus)}</td>
-            <td>${getCategoryScore(o.premisesStatus)}</td>
+            <td>${renderGroupedDisplay(o.pantryStatus)}</td>
+            <td>${renderGroupedDisplay(o.restroomsStatus)}</td>
+            <td>${renderGroupedDisplay(o.meetingRoomsStatus)}</td>
+            <td>${renderGroupedDisplay(o.eventsStatus)}</td>
+            <td>${renderGroupedDisplay(o.premisesStatus)}</td>
             <td>${o.certificateDate || ''}</td>
             <td>${o.certificationStatus || 'Not Certified'}</td>
-            <td class="completion-cell">${o.completionPercent || 0}%</td>
+            <td class="completion-cell">${completionPercent}</td>
             <td>
                 <button class="btn" onclick="editRow(this)">Edit</button>
                 <button class="btn-danger" onclick="deleteOffice('${o._id}')">Delete</button>
