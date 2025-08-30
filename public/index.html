@@ -180,14 +180,9 @@
 
 <button class="btn" onclick="openModal()">➕ Add New Office</button>
 
-<div id="errorBanner" style="display:none; 
-     margin:15px 0; 
-     padding:10px; 
-     background:#f8d7da; 
-     color:#721c24; 
-     border:1px solid #f5c6cb; 
-     border-radius:5px; 
-     text-align:center;">
+<<div id="certificateMessage" 
+     style="display:none; text-align:center; margin:10px 0; padding:10px; 
+            border-radius:6px; background:#f0f0f0; font-weight:bold; color:#333;">
 </div>
 
 <div id="officeModal" class="modal">
@@ -472,29 +467,16 @@ async function deleteOffice(id) {
 }
 
 /*Certificate Generation */
-function showError(message) {
-    const banner = document.getElementById("errorBanner");
-    banner.innerText = message;
-    banner.style.display = "block";
+async function generateCertificate(id) {
+    const res = await fetch(`${API_URL}/${id}/certificate`);
+    const data = await res.json();
 
-    // auto hide after 5s
-    setTimeout(() => {
-        banner.style.display = "none";
-    }, 5000);
-}
-
-function generateCertificate(id, status) {
-    const validStatuses = ["Bronze", "Silver", "Gold", "Platinum"];
-
-    if (!validStatuses.some(s => status.includes(s))) {
-        showError("❌ Certificate cannot be generated for Not Certified offices.");
-        return;
+    const banner = document.getElementById('certificateMessage');
+    if (banner) {
+        banner.textContent = data.message;
+        banner.style.display = "block";
     }
-
-    // ✅ For now, just show a message
-    showError(`✅ Certificate generation allowed for status: ${status}. (Backend coming soon!)`);
 }
-
 
 /* Export */
 function exportToCSV() {
