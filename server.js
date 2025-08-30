@@ -138,23 +138,23 @@ app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
 
-// Certificate generation placeholder
-app.get('/api/offices/:id/certificate', async (req, res) => {
-    try {
-        const office = await Office.findById(req.params.id);
-        if (!office) return res.status(404).json({ message: 'Office not found' });
+// Certificate eligibility check
+app.get('/api/offices/:id/certificate-check', async (req, res) => {
+  try {
+    const office = await Office.findById(req.params.id);
+    if (!office) return res.status(404).json({ message: "Office not found" });
 
-        // Only allow Bronze, Silver, Gold, Platinum
-        const validStatuses = ["Bronze", "Silver", "Gold", "Platinum"];
-        if (validStatuses.includes(office.certificationStatus.replace(/<[^>]*>/g, '').trim())) {
-            return res.json({ message: 'Generating your certificate... please wait.' });
-        } else {
-            return res.status(400).json({ message: 'Office space not yet certified' });
-        }
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+    // Use backend completionPercent
+    if (office.completionPercent < 40) {
+      return res.json({ certified: false, message: "Office space not yet certified" });
     }
+
+    return res.json({ certified: true, message: "Generating your certificate... please wait." });
+  } catch (err) {
+    res.status(500).json({ message: "Error checking certificate", error: err.message });
+  }
 });
+
 
 
 

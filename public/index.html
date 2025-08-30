@@ -375,7 +375,7 @@ async function loadOffices() {
             <td>
                 <button class="btn" onclick="editRow(this)">Edit</button>
                 <button class="btn-danger" onclick="deleteOffice('${o._id}')">Delete</button>
-                <button class="btn" onclick="generateCertificate('${o._id}')">Certificate</button>
+                <<button class="btn" onclick="generateCertificate('${o._id}')">Certificate</button>
             </td>
         `;
         tbody.appendChild(row);
@@ -467,37 +467,36 @@ async function deleteOffice(id) {
 }
 
 /*Certificate Generation */
-function showPopup(message, isError = false) {
-    let popup = document.createElement("div");
-    popup.innerText = message;
-    popup.style.position = "fixed";
-    popup.style.bottom = "20px";
-    popup.style.left = "50%";
-    popup.style.transform = "translateX(-50%)";
-    popup.style.padding = "10px 20px";
-    popup.style.borderRadius = "6px";
-    popup.style.color = "#fff";
-    popup.style.fontWeight = "bold";
-    popup.style.background = isError ? "#dc3545" : "#28a745"; // red for error, green for success
-    popup.style.zIndex = "1000";
-
-    document.body.appendChild(popup);
-
-    setTimeout(() => {
-        popup.remove();
-    }, 3000); // disappear after 3 seconds
-}
-
 async function generateCertificate(id) {
-    const res = await fetch(`${API_URL}/${id}/certificate`);
-    const data = await res.json();
-    if (res.ok) {
-        showPopup(data.message, false);
-    } else {
-        showPopup(data.message, true);
+    const msgBox = document.getElementById("messageBox");
+    if (!msgBox) {
+        const div = document.createElement("div");
+        div.id = "messageBox";
+        div.style.position = "fixed";
+        div.style.bottom = "20px";
+        div.style.left = "50%";
+        div.style.transform = "translateX(-50%)";
+        div.style.background = "#333";
+        div.style.color = "#fff";
+        div.style.padding = "10px 20px";
+        div.style.borderRadius = "5px";
+        div.style.display = "none";
+        document.body.appendChild(div);
     }
+
+    const res = await fetch(`/api/offices/${id}/certificate-check`);
+    const data = await res.json();
+
+    showMessage(data.message, data.certified ? "#28a745" : "#dc3545");
 }
 
+function showMessage(text, bgColor) {
+    const box = document.getElementById("messageBox");
+    box.innerText = text;
+    box.style.background = bgColor;
+    box.style.display = "block";
+    setTimeout(() => { box.style.display = "none"; }, 3000);
+}
 
 /* Export */
 function exportToCSV() {
