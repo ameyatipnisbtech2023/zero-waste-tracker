@@ -153,24 +153,43 @@
         font-size: 0.9em;
     }
 
-    /* Slim + rounded scrollbar */
-    ::-webkit-scrollbar {
+    /* Scrollable table container */
+    .table-container {
+        max-height: 500px;   
+        overflow-y: auto;
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+    }
+
+    /* Make table header sticky */
+    .table-container table thead th {
+        position: sticky;
+        top: 0;
+        background: #28a745;
+        color: white;
+        z-index: 2;
+    }
+
+    /* Slim + rounded green scrollbar only inside table */
+    .table-container::-webkit-scrollbar {
         width: 8px;
     }
 
-    ::-webkit-scrollbar-track {
+    .table-container::-webkit-scrollbar-track {
         background: #f1f1f1; 
         border-radius: 10px;
     }
 
-    ::-webkit-scrollbar-thumb {
+    .table-container::-webkit-scrollbar-thumb {
         background: #28a745; 
         border-radius: 10px;
     }
 
-    ::-webkit-scrollbar-thumb:hover {
+    .table-container::-webkit-scrollbar-thumb:hover {
         background: #218838;
     }
+
 </style>
 </head>
 <body>
@@ -225,17 +244,6 @@
     </form>
   </div>
 </div>
-
-<table id="officeTable">
-<thead>
-<tr>
-    <th>Office Name</th><th>Department</th><th>Contact Person</th><th>Contact Email</th><th>Total Employees</th>
-    <th>Pantry</th><th>Restrooms</th><th>Meeting Rooms</th><th>Events</th><th>Premises</th>
-    <th>Certificate Date</th><th>Certification Status</th><th>Completion (%)</th><th>Actions</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
 
 <!-- Scrollable Table -->
 <div style="max-height: 500px; overflow-y: auto; margin-top:20px; border:1px solid #ccc;">
