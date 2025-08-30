@@ -1,3 +1,7 @@
+import fs from "fs";
+import path from "path";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -152,6 +156,73 @@ app.get('/api/offices/:id/certificate-check', async (req, res) => {
     return res.json({ certified: true, message: "Generating your certificate... please wait." });
   } catch (err) {
     res.status(500).json({ message: "Error checking certificate", error: err.message });
+  }
+});
+
+app.get("/api/offices/:id/certificate", async (req, res) => {
+  try {
+    const office = await Office.findById(req.params.id);
+    if (!office) return res.status(404).send("Office not found");
+
+    // Only allow Bronze, Silver, Gold, Platinum
+    const validStatuses = ["Bronze", "Silver", "Gold", "Platinum"];
+    if (!validStatuses.includes(office.certificationStatus.replace(/<[^>]*>/g, ""))) {
+      return res.status(400).send("Office not eligible for certificate");
+    }
+
+    // Load the PDF template
+    const templatePath = path.join(__dirname, "certificate_template.pdf");
+    const templateBytes = fs.readFileSync(templatePath);
+    const pdfDoc = await PDFDocument.load(templateBytes);
+
+    // Get first page of template
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+
+    const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const { height } = firstPage.getSize();
+
+    // Clean certification status (strip HTML tags if any)
+    const cleanStatus = office.certificationStatus.replace(/<[^>]*>/g, "");
+
+    // Motivational message
+    const messages = {
+      Bronze: "Great start! You’ve taken the first steps towards sustainability.",
+      Silver: "Commendable progress! Your efforts are making a real difference.",
+      Gold: "Outstanding commitment! You’re setting an inspiring standard.",
+      Platinum: "Exemplary achievement! You are a true leader in Zero Waste practices."
+    };
+    const message = messages[cleanStatus] || "";
+
+    // Draw dynamic fields (adjust x, y to match your template blanks)
+    firstPage.drawText(`Office: ${office.officeName}`, {
+      x: 200, y: height - 250, size: 14, font, color: rgb(0, 0, 0),
+    });
+    firstPage.drawText(`Department: ${office.department}`, {
+      x: 200, y: height - 280, size: 14, font, color: rgb(0, 0, 0),
+    });
+    firstPage.drawText(`Certification: ${cleanStatus}`, {
+      x: 200, y: height - 310, size: 14, font, color: rgb(0.2, 0.2, 0.2),
+    });
+    firstPage.drawText(`Completion: ${office.completionPercent}%`, {
+      x: 200, y: height - 340, size: 14, font, color: rgb(0, 0.4, 0),
+    });
+    firstPage.drawText(message, {
+      x: 100, y: height - 380, size: 12, font, color: rgb(0, 0, 0),
+    });
+    firstPage.drawText(`Issued on: ${office.certificateDate || new Date().toLocaleDateString()}`, {
+      x: 200, y: 80, size: 10, font, color: rgb(0, 0, 0),
+    });
+
+    // Save modified PDF
+    const pdfBytes = await pdfDoc.save();
+
+    res.setHeader("Content-Disposition", `attachment; filename=certificate_${office.officeName}.pdf`);
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(Buffer.from(pdfBytes));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error generating certificate");
   }
 });
 
