@@ -146,6 +146,12 @@
         to { transform: scale(1); opacity: 1; }
     }
     .close { float: right; font-size: 28px; cursor: pointer; }
+
+    td button {
+        padding: 4px 8px;
+        margin: 2px;
+        font-size: 0.9em;
+    }
 </style>
 </head>
 <body>
@@ -374,7 +380,7 @@ async function loadOffices() {
             <td>
                 <button class="btn" onclick="editRow(this)">Edit</button>
                 <button class="btn-danger" onclick="deleteOffice('${o._id}')">Delete</button>
-                <button class="btn" onclick="generateCertificate('${o._id}', \`${o.certificationStatus || 'Not Certified'}\`)">Certificate</button>
+                <button class="btn" onclick="generateCertificate('${o._id}')">Certificate</button>
             </td>
         `;
         tbody.appendChild(row);
