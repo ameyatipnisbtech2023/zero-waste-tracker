@@ -542,6 +542,24 @@ function showMessage(text, bgColor) {
     setTimeout(() => { box.style.display = "none"; }, 3000);
 }
 
+function handleCertificate(id) {
+    fetch(`/api/offices/${id}/certificate-check`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.certified) {
+                showPopup(data.message, "error"); // your popup function
+            } else {
+                showPopup(data.message, "success");
+                // Trigger actual download
+                window.location.href = `/api/offices/${id}/certificate`;
+            }
+        })
+        .catch(err => {
+            console.error("Error checking certificate:", err);
+            showPopup("Something went wrong.", "error");
+        });
+}
+
 /* Export */
 function exportToCSV() {
     fetch(API_URL).then(res => res.json()).then(data => {
