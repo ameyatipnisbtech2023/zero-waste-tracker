@@ -467,16 +467,37 @@ async function deleteOffice(id) {
 }
 
 /*Certificate Generation */
+function showPopup(message, isError = false) {
+    let popup = document.createElement("div");
+    popup.innerText = message;
+    popup.style.position = "fixed";
+    popup.style.bottom = "20px";
+    popup.style.left = "50%";
+    popup.style.transform = "translateX(-50%)";
+    popup.style.padding = "10px 20px";
+    popup.style.borderRadius = "6px";
+    popup.style.color = "#fff";
+    popup.style.fontWeight = "bold";
+    popup.style.background = isError ? "#dc3545" : "#28a745"; // red for error, green for success
+    popup.style.zIndex = "1000";
+
+    document.body.appendChild(popup);
+
+    setTimeout(() => {
+        popup.remove();
+    }, 3000); // disappear after 3 seconds
+}
+
 async function generateCertificate(id) {
     const res = await fetch(`${API_URL}/${id}/certificate`);
     const data = await res.json();
-
-    const banner = document.getElementById('certificateMessage');
-    if (banner) {
-        banner.textContent = data.message;
-        banner.style.display = "block";
+    if (res.ok) {
+        showPopup(data.message, false);
+    } else {
+        showPopup(data.message, true);
     }
 }
+
 
 /* Export */
 function exportToCSV() {

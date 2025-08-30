@@ -142,20 +142,20 @@ app.listen(PORT, () => {
 app.get('/api/offices/:id/certificate', async (req, res) => {
     try {
         const office = await Office.findById(req.params.id);
-        if (!office) {
-            return res.status(404).json({ message: "Office not found" });
-        }
+        if (!office) return res.status(404).json({ message: 'Office not found' });
 
-        const status = office.certificationStatus?.replace(/<[^>]*>/g, ""); // strip HTML tags if any
-        if (["Bronze", "Silver", "Gold", "Platinum"].includes(status)) {
-            return res.json({ message: "Generating your certificate... please wait." });
+        // Only allow Bronze, Silver, Gold, Platinum
+        const validStatuses = ["Bronze", "Silver", "Gold", "Platinum"];
+        if (validStatuses.includes(office.certificationStatus.replace(/<[^>]*>/g, '').trim())) {
+            return res.json({ message: 'Generating your certificate... please wait.' });
         } else {
-            return res.json({ message: "Office space not yet certified" });
+            return res.status(400).json({ message: 'Office space not yet certified' });
         }
     } catch (err) {
-        res.status(500).json({ message: "Server error", error: err.message });
+        res.status(500).json({ message: err.message });
     }
 });
+
 
 
 
