@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const fs = require("fs");
+const { PDFDocument } = require("pdf-lib");
 require('dotenv').config();
 
 const app = express();
@@ -156,10 +158,6 @@ app.get('/api/offices/:id/certificate-check', async (req, res) => {
 });
 
 // Certificate generation
-const fs = require("fs");
-const path = require("path");
-const PDFDocument = require("pdf-lib").PDFDocument;
-
 app.get("/api/offices/:id/certificate", async (req, res) => {
   try {
     const office = await Office.findById(req.params.id);
