@@ -152,6 +152,25 @@
         margin: 2px;
         font-size: 0.9em;
     }
+
+    /* Slim + rounded scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #28a745; 
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #218838;
+    }
 </style>
 </head>
 <body>
@@ -180,7 +199,7 @@
 
 <button class="btn" onclick="openModal()">➕ Add New Office</button>
 
-<<div id="certificateMessage" 
+<div id="certificateMessage" 
      style="display:none; text-align:center; margin:10px 0; padding:10px; 
             border-radius:6px; background:#f0f0f0; font-weight:bold; color:#333;">
 </div>
@@ -217,6 +236,23 @@
 </thead>
 <tbody></tbody>
 </table>
+
+<!-- Scrollable Table -->
+<div style="max-height: 500px; overflow-y: auto; margin-top:20px; border:1px solid #ccc;">
+  <table id="officeTable" style="width:100%; border-collapse: collapse;">
+    <thead style="position: sticky; top: 0; background:#28a745; color:white; z-index: 2;">
+      <tr>
+        <th>Office Name</th><th>Department</th><th>Contact Person</th>
+        <th>Contact Email</th><th>Total Employees</th>
+        <th>Pantry</th><th>Restrooms</th><th>Meeting Rooms</th>
+        <th>Events</th><th>Premises</th>
+        <th>Certificate Date</th><th>Certification Status</th>
+        <th>Completion (%)</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
 <div class="export-section">
     <button class="btn" onclick="exportToCSV()">📊 Export to CSV</button>
@@ -375,7 +411,7 @@ async function loadOffices() {
             <td>
                 <button class="btn" onclick="editRow(this)">Edit</button>
                 <button class="btn-danger" onclick="deleteOffice('${o._id}')">Delete</button>
-                <<button class="btn" onclick="generateCertificate('${o._id}')">Certificate</button>
+                <button class="btn" onclick="generateCertificate('${o._id}')">Certificate</button>
             </td>
         `;
         tbody.appendChild(row);
