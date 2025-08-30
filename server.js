@@ -1,7 +1,3 @@
-import fs from "fs";
-import path from "path";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -159,72 +155,57 @@ app.get('/api/offices/:id/certificate-check', async (req, res) => {
   }
 });
 
+// Certificate generation
+const fs = require("fs");
+const path = require("path");
+const PDFDocument = require("pdf-lib").PDFDocument;
+
 app.get("/api/offices/:id/certificate", async (req, res) => {
   try {
     const office = await Office.findById(req.params.id);
     if (!office) return res.status(404).send("Office not found");
 
-    // Only allow Bronze, Silver, Gold, Platinum
-    const validStatuses = ["Bronze", "Silver", "Gold", "Platinum"];
-    if (!validStatuses.includes(office.certificationStatus.replace(/<[^>]*>/g, ""))) {
-      return res.status(400).send("Office not eligible for certificate");
+    // Validation: only allow Bronze, Silver, Gold, Platinum
+    if (!["Bronze", "Silver", "Gold", "Platinum"].some(s => office.certificationStatus.includes(s))) {
+      return res.status(400).send("Office not certified yet");
     }
 
-    // Load the PDF template
-    const templatePath = path.join(__dirname, "certificate_template.pdf");
+    // Load the template
+    const templatePath = path.join(__dirname, "templates", "certificate_template.pdf");
     const templateBytes = fs.readFileSync(templatePath);
+
     const pdfDoc = await PDFDocument.load(templateBytes);
-
-    // Get first page of template
     const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
+    const page = pages[0];
 
-    const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    const { height } = firstPage.getSize();
-
-    // Clean certification status (strip HTML tags if any)
-    const cleanStatus = office.certificationStatus.replace(/<[^>]*>/g, "");
-
-    // Motivational message
+    // Messages by status
     const messages = {
-      Bronze: "Great start! You’ve taken the first steps towards sustainability.",
-      Silver: "Commendable progress! Your efforts are making a real difference.",
-      Gold: "Outstanding commitment! You’re setting an inspiring standard.",
-      Platinum: "Exemplary achievement! You are a true leader in Zero Waste practices."
+      Bronze: "Great start on your Zero Waste journey!",
+      Silver: "Commendable progress toward sustainability!",
+      Gold: "Outstanding commitment to Zero Waste practices!",
+      Platinum: "Exemplary achievement in Zero Waste excellence!"
     };
-    const message = messages[cleanStatus] || "";
 
-    // Draw dynamic fields (adjust x, y to match your template blanks)
-    firstPage.drawText(`Office: ${office.officeName}`, {
-      x: 200, y: height - 250, size: 14, font, color: rgb(0, 0, 0),
-    });
-    firstPage.drawText(`Department: ${office.department}`, {
-      x: 200, y: height - 280, size: 14, font, color: rgb(0, 0, 0),
-    });
-    firstPage.drawText(`Certification: ${cleanStatus}`, {
-      x: 200, y: height - 310, size: 14, font, color: rgb(0.2, 0.2, 0.2),
-    });
-    firstPage.drawText(`Completion: ${office.completionPercent}%`, {
-      x: 200, y: height - 340, size: 14, font, color: rgb(0, 0.4, 0),
-    });
-    firstPage.drawText(message, {
-      x: 100, y: height - 380, size: 12, font, color: rgb(0, 0, 0),
-    });
-    firstPage.drawText(`Issued on: ${office.certificateDate || new Date().toLocaleDateString()}`, {
-      x: 200, y: 80, size: 10, font, color: rgb(0, 0, 0),
-    });
+    // Draw text over placeholders (adjust x,y as per template spacing)
+    page.drawText(office.officeName || "", { x: 150, y: 600, size: 14 });
+    page.drawText(office.department || "", { x: 150, y: 570, size: 14 });
+    page.drawText(office.certificationStatus || "", { x: 150, y: 540, size: 14 });
+    page.drawText(`${office.completionPercent || 0}%`, { x: 150, y: 510, size: 14 });
+    page.drawText(messages[office.certificationStatus.replace(/<[^>]+>/g, '')] || "", { x: 150, y: 480, size: 12 });
+    page.drawText(new Date().toLocaleDateString(), { x: 150, y: 450, size: 12 });
 
-    // Save modified PDF
+    // Return PDF
     const pdfBytes = await pdfDoc.save();
-
-    res.setHeader("Content-Disposition", `attachment; filename=certificate_${office.officeName}.pdf`);
     res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=certificate.pdf");
     res.send(Buffer.from(pdfBytes));
+
   } catch (err) {
     console.error(err);
     res.status(500).send("Error generating certificate");
   }
 });
+
 
 
 
